@@ -25,14 +25,6 @@ const config: Config = {
         charcoal: '#0f1724',
         indigo: '#102158',
         gold: '#f6b336',
-        premium: {
-          bg: 'var(--premium-bg)',
-          'card-bg': 'var(--premium-card-bg)',
-          gold: 'var(--premium-gold)',
-          'gold-light': 'var(--premium-gold-light)',
-          muted: 'var(--premium-muted)',
-          ivory: 'var(--premium-ivory)',
-        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
