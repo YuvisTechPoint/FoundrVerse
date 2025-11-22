@@ -5,6 +5,7 @@ import Image from "next/image";
 import Navbar from "./Navbar";
 import { Star, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { PremiumIcon } from "@/components/ui/premium-icon";
 
 export default function Hero() {
   return (
@@ -27,11 +28,11 @@ export default function Hero() {
           >
             {/* Gold Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#f6b336] to-[#f9c866] rounded-full shadow-lg">
-              <span className="text-sm font-semibold text-charcoal">Founder-taught</span>
-              <span className="w-1 h-1 rounded-full bg-charcoal/40" />
-              <span className="text-sm font-semibold text-charcoal">30-Day Program</span>
-              <span className="w-1 h-1 rounded-full bg-charcoal/40" />
-              <span className="text-sm font-semibold text-charcoal">₹1499</span>
+              <span className="text-sm font-semibold text-charcoal dark:text-charcoal">Founder-taught</span>
+              <span className="w-1 h-1 rounded-full bg-charcoal/40 dark:bg-charcoal/40" />
+              <span className="text-sm font-semibold text-charcoal dark:text-charcoal">30-Day Program</span>
+              <span className="w-1 h-1 rounded-full bg-charcoal/40 dark:bg-charcoal/40" />
+              <span className="text-sm font-semibold text-charcoal dark:text-charcoal">₹1499</span>
             </div>
 
             <div className="mb-4 flex items-center gap-4">
@@ -78,32 +79,139 @@ export default function Hero() {
             </div>
 
             {/* Micro Trustline */}
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium pt-2 transition-colors duration-300">
-              Build • Launch • Pitch
-            </p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="pt-2"
+            >
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 tracking-wide transition-colors duration-300">
+                <span className="inline-block mr-2">Build</span>
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 mx-2 align-middle" />
+                <span className="inline-block mr-2">Launch</span>
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 mx-2 align-middle" />
+                <span className="inline-block">Pitch</span>
+              </p>
+            </motion.div>
 
             {/* Social Proof */}
-            <div className="flex items-center gap-4 pt-4">
-              <div className="flex -space-x-3">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex items-center gap-6 pt-6"
+            >
+              {/* Overlapping Avatar Circles */}
+              <div className="flex -space-x-2 relative group">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div
+                  <motion.div
                     key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-white flex items-center justify-center text-white font-semibold text-sm shadow-md"
+                    initial={{ opacity: 0, scale: 0, x: -20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ 
+                      delay: 0.5 + (i * 0.1), 
+                      duration: 0.4,
+                      type: "spring",
+                      stiffness: 200
+                    }}
+                    whileHover={{ 
+                      scale: 1.15, 
+                      zIndex: 10,
+                      transition: { duration: 0.2 }
+                    }}
+                    className="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-[3px] border-white dark:border-gray-900 flex items-center justify-center text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    style={{
+                      background: `linear-gradient(135deg, 
+                        hsl(${220 + i * 10}, 70%, ${60 - i * 2}%), 
+                        hsl(${270 + i * 10}, 70%, ${55 - i * 2}%))`
+                    }}
                   >
-                    {String.fromCharCode(64 + i)}
+                    <span className="relative z-10 drop-shadow-sm">
+                      {String.fromCharCode(64 + i)}
+                    </span>
+                    {/* Glow effect on hover */}
+                    <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+                  </motion.div>
+                ))}
+                {/* Pulse ring animation */}
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-indigo-400/50"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+
+              {/* Star Rating */}
+              <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md border border-gray-200/50 dark:border-gray-700/50">
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      transition={{ 
+                        delay: 0.7 + (i * 0.08), 
+                        duration: 0.4,
+                        type: "spring",
+                        stiffness: 200
+                      }}
+                      whileHover={{ 
+                        scale: 1.2, 
+                        rotate: 15,
+                        transition: { duration: 0.2 }
+                      }}
+                      className="relative"
+                    >
+                      <Star className="w-5 h-5 fill-[#f6b336] text-[#f6b336] drop-shadow-sm" />
+                      {/* Twinkle effect */}
+                      <motion.div
+                        className="absolute inset-0"
+                        animate={{
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <Star className="w-5 h-5 fill-white text-white" />
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Rating Text */}
+                <div className="ml-2 border-l border-gray-300 dark:border-gray-600 pl-3">
+                  <div className="flex items-baseline gap-1">
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 1.1, type: "spring", stiffness: 200 }}
+                      className="text-charcoal dark:text-white font-bold text-xl transition-colors duration-300"
+                    >
+                      4.9
+                    </motion.span>
                   </div>
-                ))}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.2 }}
+                    className="text-xs text-gray-600 dark:text-gray-400 font-medium transition-colors duration-300 leading-tight"
+                  >
+                    from 500+ reviews
+                  </motion.p>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-5 h-5 fill-[#f6b336] text-[#f6b336]" />
-                ))}
-              </div>
-              <div>
-                <span className="text-charcoal dark:text-white font-bold text-lg transition-colors duration-300">4.9</span>
-                <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">from 500+ reviews</p>
-              </div>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Right Column - Founder Image with 3D Effect */}

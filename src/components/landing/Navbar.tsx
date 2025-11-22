@@ -3,11 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +18,24 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handlePricingClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If we're already on the home page, scroll to pricing section
+    if (pathname === "/") {
+      e.preventDefault();
+      const pricingSection = document.getElementById("pricing");
+      if (pricingSection) {
+        const offset = 112; // Account for fixed navbar (top-4 + h-20 + padding)
+        const elementPosition = pricingSection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+      }
+    }
+    // Otherwise, let Next.js handle navigation to /#pricing
+  };
 
   return (
     <header className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[80%] max-w-4xl transition-all duration-300 rounded-full mx-auto border-2 border-gray-300 dark:border-gray-700 ${
@@ -48,7 +68,8 @@ export default function Navbar() {
           </Link>
           <nav className="flex items-center gap-3">
             <Link 
-              href="#pricing" 
+              href="/#pricing" 
+              onClick={handlePricingClick}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors"
             >
               Pricing

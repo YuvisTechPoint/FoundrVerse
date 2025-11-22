@@ -46,9 +46,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify webhook signature
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RZP_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('RAZORPAY_WEBHOOK_SECRET is not set');
+      const { logger } = await import('@/lib/logger');
+      logger.error('Razorpay webhook secret is not set');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
     // Idempotency check
     const eventId = payload.id || `${event}_${eventPayload?.payment?.id || eventPayload?.order?.id || Date.now()}`;
     if (isWebhookEventProcessed(eventId)) {
-      console.log(`Webhook event ${eventId} already processed, ignoring`);
+      const { logger } = await import('@/lib/logger');
+      logger.info('Webhook event already processed, ignoring', { eventId });
       return NextResponse.json({ received: true, message: 'Event already processed' });
     }
 
@@ -187,8 +189,10 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      default:
-        console.log(`Unhandled webhook event: ${event}`);
+      default: {
+        const { logger } = await import('@/lib/logger');
+        logger.warn('Unhandled webhook event', { event });
+      }
     }
 
     // Mark event as processed
@@ -196,12 +200,16 @@ export async function POST(request: NextRequest) {
 
     // Respond quickly (within 5 seconds as per Razorpay docs)
     return NextResponse.json({ received: true, event });
-  } catch (error: any) {
-    console.error('Error processing webhook:', error);
+  } catch (error: unknown) {
+    const { logger } = await import('@/lib/logger');
+    logger.error('Error processing webhook', error);
     // Still return 200 to prevent Razorpay from retrying
     // Log error for manual investigation
     return NextResponse.json(
-      { error: 'Webhook processing failed', message: error.message },
+      { 
+        error: 'Webhook processing failed', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      },
       { status: 200 }
     );
   }

@@ -42,10 +42,10 @@ export default function WhatStudentsGet() {
     <section className="bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 py-24 transition-colors duration-300" id="what">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">
             What Students Get
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-colors duration-300">
             Where students become CEOs. Intern, build, pitch, scale.
           </p>
         </div>
@@ -58,13 +58,13 @@ export default function WhatStudentsGet() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="group rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-gold"
+              className="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-gold dark:hover:border-gold/50"
             >
               <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal group-hover:scale-110 transition-transform duration-300 shadow-md">
                 <Icon size={28} />
               </div>
-              <h3 className="text-xl font-bold text-charcoal mb-3">{title}</h3>
-              <p className="text-[15px] text-gray-600 leading-relaxed">{desc}</p>
+              <h3 className="text-xl font-bold text-charcoal dark:text-white mb-3 transition-colors duration-300">{title}</h3>
+              <p className="text-[15px] text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300">{desc}</p>
             </motion.div>
           ))}
         </div>
@@ -73,18 +73,18 @@ export default function WhatStudentsGet() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
-              className="inline-block bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="inline-block bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Start Learning
             </Link>
             <Link
               href="/signup"
-              className="inline-block border-2 border-gray-900 text-gray-900 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-200"
+              className="inline-block border-2 border-gray-900 dark:border-gray-300 text-gray-900 dark:text-gray-300 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
             >
               Get Certified
             </Link>
           </div>
-          <p className="text-sm text-gray-500">Learn from founders, not professors.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">Learn from founders, not professors.</p>
         </div>
       </div>
     </section>

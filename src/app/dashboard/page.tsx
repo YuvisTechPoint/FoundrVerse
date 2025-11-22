@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, BookOpen, Users, Award, LogOut, Code, Briefcase, Users2, Megaphone, Calendar, Clock, ShoppingCart, XCircle, CheckCircle2 } from "lucide-react";
+import { PremiumIcon } from "@/components/ui/premium-icon";
 
 import { verifySessionCookie } from "@/lib/verifySession";
 import { getMockUser } from "@/data/users-mock";
@@ -267,23 +268,27 @@ export default async function DashboardPage() {
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">What You'll Get</h3>
             <div className="grid md:grid-cols-3 gap-4">
               {[
-                { icon: BookOpen, title: "30-Day Course", desc: "Complete startup blueprint" },
-                { icon: Code, title: "Practical Tasks", desc: "Hands-on execution" },
-                { icon: Briefcase, title: "Internship", desc: "Top students get internships" },
-                { icon: Users2, title: "Live Sessions", desc: "Direct founder mentorship" },
-                { icon: Megaphone, title: "Pitch Competition", desc: "Pitch to investors" },
-                { icon: Award, title: "Certificate", desc: "Industry-grade certification" },
-              ].map(({ icon: Icon, title, desc }) => (
+                { icon: BookOpen, title: "30-Day Course", desc: "Complete startup blueprint", variant: "luxury" as const },
+                { icon: Code, title: "Practical Tasks", desc: "Hands-on execution", variant: "diamond" as const },
+                { icon: Briefcase, title: "Internship", desc: "Top students get internships", variant: "platinum" as const },
+                { icon: Users2, title: "Live Sessions", desc: "Direct founder mentorship", variant: "luxury" as const },
+                { icon: Megaphone, title: "Pitch Competition", desc: "Pitch to investors", variant: "diamond" as const },
+                { icon: Award, title: "Certificate", desc: "Industry-grade certification", variant: "luxury" as const },
+              ].map(({ icon: Icon, title, desc, variant }) => (
                 <div
                   key={title}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
+                  className="flex items-start gap-4 p-5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800/50 dark:to-gray-900/30 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group"
                 >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white text-sm mb-0.5">{title}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">{desc}</p>
+                  <PremiumIcon 
+                    icon={Icon} 
+                    size={24} 
+                    variant={variant}
+                    className="!p-3 !w-12 !h-12"
+                    animated={true}
+                  />
+                  <div className="flex-1 pt-1">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mb-1 group-hover:text-gold transition-colors duration-300">{title}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -304,31 +309,52 @@ export default async function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow">
-            <div className="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-4">
-              <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+          <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="relative mb-4">
+              <PremiumIcon 
+                icon={BookOpen} 
+                size={28} 
+                variant="luxury"
+                className="!p-3"
+                animated={true}
+              />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Start Learning</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">Start Learning</h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               Access your courses and begin your startup journey
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow">
-            <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
-              <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="relative mb-4">
+              <PremiumIcon 
+                icon={Users} 
+                size={28} 
+                variant="diamond"
+                className="!p-3"
+                animated={true}
+              />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Join Community</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">Join Community</h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               Connect with fellow founders and students
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow">
-            <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
-              <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="relative mb-4">
+              <PremiumIcon 
+                icon={Award} 
+                size={28} 
+                variant="luxury"
+                className="!p-3"
+                animated={true}
+              />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Get Certified</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">Get Certified</h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               Complete the program and earn your certificate
             </p>

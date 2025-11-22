@@ -4,6 +4,8 @@ import { createHmac } from "crypto";
 
 import { getFirebaseAdminAuth } from "@/lib/firebaseAdmin";
 import { upsertMockUser } from "@/data/users-mock";
+import { errorResponse, successResponse, ApiException, withErrorHandling } from "@/lib/api-utils";
+import { logger } from "@/lib/logger";
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
@@ -22,116 +24,90 @@ function signSessionCookie(value: string) {
   return createHmac("sha256", secret).update(value).digest("base64url");
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json().catch((err) => {
-      console.error("Failed to parse request body:", err);
-      return null;
-    });
-    
-    const idToken = body?.idToken;
+export const POST = withErrorHandling(async (request: Request) => {
+  const body = await request.json().catch((err) => {
+    logger.error("Failed to parse request body", err);
+    throw new ApiException("Invalid request body", 400, "INVALID_BODY");
+  });
+  
+  const idToken = body?.idToken;
 
-    if (!idToken) {
-      console.error("Missing idToken in request body");
-      return NextResponse.json({ error: "idToken is required" }, { status: 400 });
-    }
-    
-    console.log("Creating session for user...");
-
-    const auth = getFirebaseAdminAuth();
-    
-    console.log("Verifying ID token...");
-    const decoded = await auth.verifyIdToken(idToken, true);
-    console.log("Token verified for user:", decoded.uid);
-    
-    // Convert milliseconds to seconds for expiresIn
-    const expiresInSeconds = Math.floor(SESSION_DURATION_MS / 1000);
-    console.log("Creating session cookie...");
-    const sessionCookie = await auth.createSessionCookie(idToken, {
-      expiresIn: expiresInSeconds,
-    });
-    console.log("Session cookie created successfully");
-
-    const cookieStore = await cookies();
-    const secure = process.env.NODE_ENV === "production";
-    const maxAgeSeconds = Math.floor(SESSION_DURATION_MS / 1000);
-    const signature = signSessionCookie(sessionCookie);
-
-    cookieStore.set({
-      name: SESSION_COOKIE_NAME,
-      value: sessionCookie,
-      httpOnly: true,
-      sameSite: "lax",
-      secure,
-      maxAge: maxAgeSeconds,
-      path: "/",
-    });
-
-    cookieStore.set({
-      name: SESSION_SIGNATURE_COOKIE_NAME,
-      value: signature,
-      httpOnly: true,
-      sameSite: "lax",
-      secure,
-      maxAge: maxAgeSeconds,
-      path: "/",
-    });
-
-    // Get custom claims for additional user data
-    const customClaims = decoded as any;
-    
-    // Determine display name with proper fallback
-    const displayName = customClaims.name || decoded.name || decoded.email || "Unknown";
-    
-    const user = upsertMockUser({
-      uid: decoded.uid,
-      email: decoded.email ?? undefined,
-      displayName,
-      photoURL: decoded.picture ?? undefined,
-      provider: decoded.firebase?.sign_in_provider || "email",
-      lastLoginAt: Date.now(),
-    });
-
-    console.log("Session created successfully for user:", user.uid);
-    return NextResponse.json({
-      success: true,
-      user,
-    });
-  } catch (error: any) {
-    console.error("Failed to create Firebase session - Full error:", {
-      message: error.message,
-      code: error.code,
-      stack: error.stack,
-      error: error,
-    });
-    
-    // Provide more specific error messages
-    let errorMessage = "Unable to create session";
-    let statusCode = 500;
-    
-    if (error.code === "auth/argument-error") {
-      errorMessage = "Invalid authentication token";
-      statusCode = 401;
-    } else if (error.code === "auth/id-token-expired") {
-      errorMessage = "Authentication token expired. Please sign in again.";
-      statusCode = 401;
-    } else if (error.code === "auth/id-token-revoked") {
-      errorMessage = "Authentication token revoked. Please sign in again.";
-      statusCode = 401;
-    } else if (error.message?.includes("SESSION_COOKIE_SECRET")) {
-      errorMessage = "Server configuration error. Please contact support.";
-      statusCode = 500;
-    } else if (error.message?.includes("Firebase admin credentials")) {
-      errorMessage = "Server configuration error. Firebase admin not configured.";
-      statusCode = 500;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
-    return NextResponse.json({ 
-      error: errorMessage,
-      code: error.code || undefined,
-    }, { status: statusCode });
+  if (!idToken) {
+    throw new ApiException("idToken is required", 400, "MISSING_ID_TOKEN");
   }
-}
+  
+  logger.debug("Creating session for user");
+
+  const auth = getFirebaseAdminAuth();
+  
+  logger.debug("Verifying ID token");
+  const decoded = await auth.verifyIdToken(idToken, true).catch((error) => {
+    logger.error("Token verification failed", error);
+    if (error.code === "auth/argument-error") {
+      throw new ApiException("Invalid authentication token", 401, "INVALID_TOKEN");
+    } else if (error.code === "auth/id-token-expired") {
+      throw new ApiException("Authentication token expired. Please sign in again.", 401, "TOKEN_EXPIRED");
+    } else if (error.code === "auth/id-token-revoked") {
+      throw new ApiException("Authentication token revoked. Please sign in again.", 401, "TOKEN_REVOKED");
+    }
+    throw new ApiException("Token verification failed", 401, "TOKEN_VERIFICATION_FAILED");
+  });
+  
+  logger.debug("Token verified", { uid: decoded.uid });
+  
+  // Convert milliseconds to seconds for expiresIn
+  const expiresInSeconds = Math.floor(SESSION_DURATION_MS / 1000);
+  logger.debug("Creating session cookie");
+  const sessionCookie = await auth.createSessionCookie(idToken, {
+    expiresIn: expiresInSeconds,
+  }).catch((error) => {
+    logger.error("Failed to create session cookie", error);
+    throw new ApiException("Failed to create session", 500, "SESSION_CREATION_FAILED");
+  });
+  
+  logger.debug("Session cookie created successfully");
+
+  const cookieStore = await cookies();
+  const secure = process.env.NODE_ENV === "production";
+  const maxAgeSeconds = Math.floor(SESSION_DURATION_MS / 1000);
+  const signature = signSessionCookie(sessionCookie);
+
+  cookieStore.set({
+    name: SESSION_COOKIE_NAME,
+    value: sessionCookie,
+    httpOnly: true,
+    sameSite: "lax",
+    secure,
+    maxAge: maxAgeSeconds,
+    path: "/",
+  });
+
+  cookieStore.set({
+    name: SESSION_SIGNATURE_COOKIE_NAME,
+    value: signature,
+    httpOnly: true,
+    sameSite: "lax",
+    secure,
+    maxAge: maxAgeSeconds,
+    path: "/",
+  });
+
+  // Get custom claims for additional user data
+  const customClaims = decoded as Record<string, unknown>;
+  
+  // Determine display name with proper fallback
+  const displayName = (customClaims.name || decoded.name || decoded.email || "Unknown") as string;
+  
+  const user = upsertMockUser({
+    uid: decoded.uid,
+    email: decoded.email ?? undefined,
+    displayName,
+    photoURL: decoded.picture ?? undefined,
+    provider: (decoded.firebase as { sign_in_provider?: string })?.sign_in_provider || "email",
+    lastLoginAt: Date.now(),
+  });
+
+  logger.info("Session created successfully", { uid: user.uid });
+  return successResponse({ user });
+});
 

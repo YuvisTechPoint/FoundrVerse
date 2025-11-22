@@ -1,9 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { mockRevenueData } from "@/data/admin-mock";
+import { withAdminAuth } from "@/lib/auth-middleware";
+import { successResponse, withErrorHandling } from "@/lib/api-utils";
 
-export async function GET() {
-  // TODO: Replace with real database query
-  // TODO: Add proper authentication check
-  return NextResponse.json(mockRevenueData);
-}
+export const GET = withErrorHandling(
+  withAdminAuth(async (request: NextRequest) => {
+    // TODO: Replace with real database query
+    return successResponse(mockRevenueData);
+  })
+);
 

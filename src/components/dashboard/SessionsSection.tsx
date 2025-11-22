@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Video, PlayCircle, Radio, Clock, X, Users, Eye, Calendar, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PremiumIcon } from "@/components/ui/premium-icon";
 
 interface Session {
   id: string;
@@ -87,9 +88,13 @@ export default function SessionsSection() {
         <div className="flex items-center justify-between mb-10">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
-                <Video className="w-6 h-6 text-white" />
-              </div>
+              <PremiumIcon 
+                icon={Video} 
+                size={24} 
+                variant="diamond"
+                className="!p-2.5"
+                animated={true}
+              />
               <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
                 Live & Recorded Sessions
               </h2>

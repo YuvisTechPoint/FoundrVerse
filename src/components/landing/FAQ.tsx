@@ -43,7 +43,7 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="bg-white py-24" id="faq">
+    <section className="bg-white dark:bg-gray-900 py-24 transition-colors duration-300" id="faq">
       <div className="mx-auto max-w-4xl px-6 sm:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,10 +52,10 @@ export default function FAQ() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-charcoal mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-charcoal dark:text-white mb-4 transition-colors duration-300">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300">
             Everything you need to know about Mewayz - FoundrVerse
           </p>
         </motion.div>
@@ -68,18 +68,18 @@ export default function FAQ() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+              className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow transition-colors duration-300"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 rounded-2xl"
+                className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 rounded-2xl transition-colors duration-300"
                 aria-expanded={openIndex === index}
               >
-                <span className="text-lg font-semibold text-charcoal pr-4">
+                <span className="text-lg font-semibold text-charcoal dark:text-white pr-4 transition-colors duration-300">
                   {faq.question}
                 </span>
                 <ChevronDown
-                  className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
+                  className={`w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 transition-transform duration-200 transition-colors ${
                     openIndex === index ? "rotate-180" : ""
                   }`}
                 />
@@ -89,7 +89,7 @@ export default function FAQ() {
                   openIndex === index ? "max-h-96" : "max-h-0"
                 }`}
               >
-                <div className="px-6 pb-5 text-gray-600 leading-relaxed">
+                <div className="px-6 pb-5 text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300">
                   {faq.answer}
                 </div>
               </div>

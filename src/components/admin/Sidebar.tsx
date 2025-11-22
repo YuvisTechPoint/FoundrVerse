@@ -18,6 +18,7 @@ import {
   CreditCard
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PremiumIcon } from "@/components/ui/premium-icon";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -87,11 +88,21 @@ export default function Sidebar() {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? "bg-gradient-to-r from-gold to-[#f9c866] text-charcoal font-semibold shadow-sm"
+                  ? "bg-gradient-to-r from-gold to-[#f9c866] text-charcoal font-semibold shadow-lg"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
-              <Icon className="w-5 h-5" />
+              {isActive ? (
+                <PremiumIcon 
+                  icon={Icon} 
+                  size={20} 
+                  variant="gradient"
+                  animated={false}
+                  className="!p-1.5"
+                />
+              ) : (
+                <Icon className="w-5 h-5" />
+              )}
               <span>{item.label}</span>
             </Link>
           );
@@ -101,9 +112,11 @@ export default function Sidebar() {
       <div className="p-4 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 w-full transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 w-full transition-colors group"
         >
-          <LogOut className="w-5 h-5" />
+          <motion.div whileHover={{ rotate: -15 }} transition={{ duration: 0.2 }}>
+            <LogOut className="w-5 h-5 group-hover:text-red-500 transition-colors" />
+          </motion.div>
           <span>Logout</span>
         </button>
       </div>

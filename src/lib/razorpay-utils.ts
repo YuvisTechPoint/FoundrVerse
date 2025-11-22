@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { logger } from './logger';
 
 /**
  * Verify Razorpay payment signature
@@ -16,7 +17,7 @@ export function verifyPaymentSignature(
 ): boolean {
   try {
     if (!orderId || !paymentId || !signature || !secret) {
-      console.error('Missing required parameters for signature verification', {
+      logger.error('Missing required parameters for signature verification', undefined, {
         hasOrderId: !!orderId,
         hasPaymentId: !!paymentId,
         hasSignature: !!signature,
@@ -36,7 +37,7 @@ export function verifyPaymentSignature(
     const expectedBuffer = Buffer.from(expectedSignature, 'hex');
     
     if (signatureBuffer.length !== expectedBuffer.length) {
-      console.error('Signature length mismatch', {
+      logger.error('Signature length mismatch', undefined, {
         received: signatureBuffer.length,
         expected: expectedBuffer.length,
       });
@@ -45,8 +46,8 @@ export function verifyPaymentSignature(
     
     // Constant-time comparison to prevent timing attacks
     return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
-  } catch (error: any) {
-    console.error('Error in verifyPaymentSignature:', error);
+  } catch (error) {
+    logger.error('Error in verifyPaymentSignature', error);
     return false;
   }
 }

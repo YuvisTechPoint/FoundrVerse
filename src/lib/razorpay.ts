@@ -60,7 +60,8 @@ export async function createOrder(params: CreateOrderParams) {
     return order;
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('Error creating Razorpay order:', error);
+    const { logger } = await import('./logger');
+    logger.error('Error creating Razorpay order', error);
     throw new Error(`Failed to create order: ${errorMessage}`);
   }
 }

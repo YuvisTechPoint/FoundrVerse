@@ -2,6 +2,7 @@
 
 import { CheckCircle, Circle, BookOpen, Video, FileText, Award } from "lucide-react";
 import { motion } from "framer-motion";
+import { PremiumIcon } from "@/components/ui/premium-icon";
 
 interface CourseModule {
   id: string;
@@ -25,9 +26,13 @@ export default function CourseProgress({ progress, modules, totalModules, comple
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-8 mb-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
-            <BookOpen className="w-8 h-8 text-white" />
-          </div>
+          <PremiumIcon 
+            icon={BookOpen} 
+            size={32} 
+            variant="luxury"
+            className="!p-4"
+            animated={true}
+          />
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Course Progress</h2>
             <p className="text-gray-600 dark:text-gray-400">Track your learning journey</p>

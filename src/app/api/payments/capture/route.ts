@@ -1,69 +1,76 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
+import { NextRequest } from 'next/server';
+import { getRazorpayClient } from '@/lib/razorpay';
 import {
   getPaymentByPaymentId,
   updatePaymentByOrderId,
 } from '@/data/payments-mock';
+import { errorResponse, successResponse, validateRequired, validateNumber, ApiException, withErrorHandling } from '@/lib/api-utils';
+import { logger } from '@/lib/logger';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const body = await request.json().catch(() => {
+    throw new ApiException('Invalid JSON in request body', 400, 'INVALID_JSON');
+  });
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { paymentId, amount } = body;
+  const { paymentId, amount } = body;
 
-    if (!paymentId) {
-      return NextResponse.json(
-        { error: 'Payment ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get payment record
-    const payment = getPaymentByPaymentId(paymentId);
-    if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
-    }
-
-    // Capture payment via Razorpay
-    const captureOptions: any = {};
-    if (amount) {
-      captureOptions.amount = Math.round(amount * 100); // Convert to paise
-    }
-
-    const capturedPayment = await razorpay.payments.capture(
-      paymentId,
-      captureOptions.amount || undefined
-    );
-
-    // Update payment record
-    updatePaymentByOrderId(payment.orderId, {
-      status: 'captured',
-      paidAt: new Date().toISOString(),
-    });
-
-    return NextResponse.json({
-      success: true,
-      paymentId: capturedPayment.id,
-      status: capturedPayment.status,
-      amount: capturedPayment.amount / 100,
-      capturedAt: new Date(capturedPayment.captured_at * 1000).toISOString(),
-    });
-  } catch (error: any) {
-    console.error('Error capturing payment:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to capture payment',
-        message: error.message || 'Unknown error',
-      },
-      { status: 500 }
-    );
+  const validation = validateRequired(body, ['paymentId']);
+  if (!validation.isValid) {
+    throw new ApiException('Payment ID is required', 400, 'MISSING_PAYMENT_ID');
   }
-}
+
+  // Get payment record
+  const payment = getPaymentByPaymentId(paymentId);
+  if (!payment) {
+    throw new ApiException('Payment not found', 404, 'PAYMENT_NOT_FOUND');
+  }
+
+  // Validate amount if provided
+  if (amount !== undefined) {
+    const amountValidation = validateNumber(amount, 0.01);
+    if (!amountValidation.isValid) {
+      throw new ApiException(
+        amountValidation.error || 'Invalid amount',
+        400,
+        'INVALID_AMOUNT'
+      );
+    }
+  }
+
+  // Capture payment via Razorpay
+  const razorpay = getRazorpayClient();
+  const captureAmount = amount ? Math.round((typeof amount === 'string' ? parseFloat(amount) : amount) * 100) : undefined;
+
+  // Razorpay capture signature: capture(paymentId, amount, currency, receipt)
+  const capturedPayment = await razorpay.payments.capture(
+    paymentId,
+    captureAmount || payment.amount * 100, // amount in paise
+    payment.currency || 'INR' // currency
+  ).catch((error) => {
+    logger.error('Failed to capture payment via Razorpay', error);
+    throw new ApiException(
+      `Failed to capture payment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      500,
+      'CAPTURE_FAILED'
+    );
+  });
+
+  // Update payment record
+  updatePaymentByOrderId(payment.orderId, {
+    status: 'captured',
+    paidAt: new Date().toISOString(),
+  });
+
+  logger.info('Payment captured successfully', {
+    paymentId: capturedPayment.id,
+    orderId: payment.orderId,
+  });
+
+  return successResponse({
+    paymentId: capturedPayment.id,
+    status: capturedPayment.status,
+    amount: (capturedPayment.amount as number) / 100,
+    capturedAt: new Date((capturedPayment.captured_at as number) * 1000).toISOString(),
+  });
+});
 

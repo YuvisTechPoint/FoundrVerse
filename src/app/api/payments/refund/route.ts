@@ -1,74 +1,88 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
+import { NextRequest } from 'next/server';
+import { getRazorpayClient } from '@/lib/razorpay';
 import {
   getPaymentByPaymentId,
   addRefund,
 } from '@/data/payments-mock';
+import { errorResponse, successResponse, validateRequired, validateNumber, ApiException, withErrorHandling } from '@/lib/api-utils';
+import { logger } from '@/lib/logger';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const body = await request.json().catch(() => {
+    throw new ApiException('Invalid JSON in request body', 400, 'INVALID_JSON');
+  });
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { paymentId, amount, reason, notes } = body;
+  const { paymentId, amount, reason, notes } = body;
 
-    if (!paymentId) {
-      return NextResponse.json(
-        { error: 'Payment ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get payment record
-    const payment = getPaymentByPaymentId(paymentId);
-    if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
-    }
-
-    // Prepare refund options
-    const refundOptions: any = {};
-    if (amount) {
-      refundOptions.amount = Math.round(amount * 100); // Convert to paise
-    }
-    if (notes) {
-      refundOptions.notes = notes;
-    }
-
-    // Create refund via Razorpay
-    const refund = await razorpay.payments.refund(paymentId, refundOptions);
-
-    // Store refund record
-    const refundRecord = addRefund(paymentId, {
-      refundId: refund.id,
-      paymentId,
-      amount: refund.amount / 100,
-      status: refund.status === 'processed' ? 'processed' : 'pending',
-      reason: reason || refund.notes?.comment || 'Refund requested',
-    });
-
-    return NextResponse.json({
-      success: true,
-      refundId: refund.id,
-      paymentId,
-      amount: refund.amount / 100,
-      status: refund.status,
-      createdAt: new Date(refund.created_at * 1000).toISOString(),
-    });
-  } catch (error: any) {
-    console.error('Error creating refund:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to create refund',
-        message: error.message || 'Unknown error',
-      },
-      { status: 500 }
-    );
+  const validation = validateRequired(body, ['paymentId']);
+  if (!validation.isValid) {
+    throw new ApiException('Payment ID is required', 400, 'MISSING_PAYMENT_ID');
   }
-}
+
+  // Get payment record
+  const payment = getPaymentByPaymentId(paymentId);
+  if (!payment) {
+    throw new ApiException('Payment not found', 404, 'PAYMENT_NOT_FOUND');
+  }
+
+  // Validate amount if provided
+  if (amount !== undefined) {
+    const amountValidation = validateNumber(amount, 0.01);
+    if (!amountValidation.isValid) {
+      throw new ApiException(
+        amountValidation.error || 'Invalid amount',
+        400,
+        'INVALID_AMOUNT'
+      );
+    }
+  }
+
+  // Prepare refund options
+  const refundOptions: {
+    amount?: number;
+    notes?: Record<string, string>;
+  } = {};
+  
+  if (amount) {
+    refundOptions.amount = Math.round((typeof amount === 'string' ? parseFloat(amount) : amount) * 100); // Convert to paise
+  }
+  
+  if (notes && typeof notes === 'object') {
+    refundOptions.notes = notes as Record<string, string>;
+  }
+
+  // Create refund via Razorpay
+  const razorpay = getRazorpayClient();
+  const refund = await razorpay.payments.refund(paymentId, refundOptions).catch((error) => {
+    logger.error('Failed to create refund via Razorpay', error);
+    throw new ApiException(
+      `Failed to create refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      500,
+      'REFUND_FAILED'
+    );
+  });
+
+  // Store refund record
+  addRefund(paymentId, {
+    refundId: refund.id,
+    paymentId,
+    amount: refund.amount / 100,
+    status: refund.status === 'processed' ? 'processed' : 'pending',
+    reason: reason || (refund.notes as { comment?: string })?.comment || 'Refund requested',
+  });
+
+  logger.info('Refund created successfully', {
+    refundId: refund.id,
+    paymentId,
+    amount: refund.amount / 100,
+  });
+
+  return successResponse({
+    refundId: refund.id,
+    paymentId,
+    amount: refund.amount / 100,
+    status: refund.status,
+    createdAt: new Date((refund.created_at as number) * 1000).toISOString(),
+  });
+});
 

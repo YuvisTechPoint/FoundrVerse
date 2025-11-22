@@ -1,40 +1,41 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { mockStudents } from "@/data/admin-mock";
+import { withAdminAuth } from "@/lib/auth-middleware";
+import { successResponse, parsePagination, withErrorHandling } from "@/lib/api-utils";
 
-export async function GET(request: Request) {
-  // TODO: Replace with real database query
-  // TODO: Add proper authentication check
-  const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "25");
-  const search = searchParams.get("search") || "";
-  const filter = searchParams.get("filter") || "";
+export const GET = withErrorHandling(
+  withAdminAuth(async (request: NextRequest) => {
+    // TODO: Replace with real database query
+    const { searchParams } = new URL(request.url);
+    const { page, limit, offset } = parsePagination(searchParams);
+    const search = searchParams.get("search") || "";
+    const filter = searchParams.get("filter") || "";
 
-  let filtered = [...mockStudents];
+    let filtered = [...mockStudents];
 
-  if (search) {
-    filtered = filtered.filter(
-      (s) =>
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.email.toLowerCase().includes(search.toLowerCase()) ||
-        s.college.toLowerCase().includes(search.toLowerCase())
-    );
-  }
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(
+        (s) =>
+          s.name.toLowerCase().includes(searchLower) ||
+          s.email.toLowerCase().includes(searchLower) ||
+          s.college.toLowerCase().includes(searchLower)
+      );
+    }
 
-  if (filter) {
-    filtered = filtered.filter((s) => s.enrollmentStatus === filter);
-  }
+    if (filter) {
+      filtered = filtered.filter((s) => s.enrollmentStatus === filter);
+    }
 
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginated = filtered.slice(start, end);
+    const paginated = filtered.slice(offset, offset + limit);
 
-  return NextResponse.json({
-    students: paginated,
-    total: filtered.length,
-    page,
-    limit,
-    totalPages: Math.ceil(filtered.length / limit),
-  });
-}
+    return successResponse({
+      students: paginated,
+      total: filtered.length,
+      page,
+      limit,
+      totalPages: Math.ceil(filtered.length / limit),
+    });
+  })
+);
 

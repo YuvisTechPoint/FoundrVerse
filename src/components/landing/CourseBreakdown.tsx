@@ -16,10 +16,10 @@ export default function CourseBreakdown() {
     <section className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 py-24 transition-colors duration-300" id="course">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">
             Course Breakdown
           </h2>
-          <p className="text-xl text-gray-600">From idea to investors in 30 days.</p>
+          <p className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300">From idea to investors in 30 days.</p>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
