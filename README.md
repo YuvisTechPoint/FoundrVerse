@@ -1,4 +1,4 @@
-# 🚀 FoundrVerse
+#  FoundrVerse
 
 > India's First Practical Startup School for Students
 
