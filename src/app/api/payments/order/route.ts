@@ -97,7 +97,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   return successResponse({
     orderId: razorpayOrder.id,
-    amount: razorpayOrder.amount / 100, // Convert back from paise
+    amount: (razorpayOrder.amount as number) / 100, // Convert back from paise
     currency: razorpayOrder.currency,
     receipt: razorpayOrder.receipt,
     status: razorpayOrder.status,

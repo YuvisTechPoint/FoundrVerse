@@ -1,6 +1,6 @@
-#  FoundrVerse
+# 🚀 FoundrVerse
 
-> India's First Practical Startup School for Students
+> Startup School by Founders, for Students
 
 A comprehensive Next.js platform that offers practical startup education through courses, internships, and pitch opportunities. Built with modern web technologies for a seamless learning experience.
 

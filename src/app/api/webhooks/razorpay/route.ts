@@ -114,10 +114,15 @@ export async function POST(request: NextRequest) {
         const paymentRecord = getPaymentByOrderId(payment.order_id);
         
         if (paymentRecord) {
+          // Use captured_at from webhook if available, otherwise use current time
+          const capturedAt = (payment as any).captured_at 
+            ? new Date((payment as any).captured_at * 1000).toISOString()
+            : new Date().toISOString();
+          
           updatePaymentByOrderId(payment.order_id, {
             paymentId: payment.id,
             status: 'captured',
-            paidAt: new Date(payment.captured_at * 1000).toISOString(),
+            paidAt: capturedAt,
             method: payment.method,
           });
         }
