@@ -70,7 +70,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     paymentId: capturedPayment.id,
     status: capturedPayment.status,
     amount: (capturedPayment.amount as number) / 100,
-    capturedAt: new Date().toISOString(), // Use current time since we just captured it
+    capturedAt: new Date().toISOString(), // Use current time since payment was just captured
   });
 });
 
