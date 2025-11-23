@@ -277,10 +277,38 @@ npm run clean        # Clean build cache
 
 ---
 
+## 🚀 Deployment
+
+### Deploy to Vercel (Recommended)
+
+FoundrVerse is optimized for Vercel deployment. Follow the complete guide:
+
+📖 **[Complete Vercel Deployment Guide](VERCEL_DEPLOYMENT.md)**
+
+**Quick Steps:**
+1. Push your code to GitHub (already done ✅)
+2. Import project in [Vercel Dashboard](https://vercel.com/dashboard)
+3. Configure environment variables (see guide)
+4. Deploy!
+
+**Required Environment Variables:**
+- Firebase configuration (all `NEXT_PUBLIC_FIREBASE_*` vars)
+- Firebase Admin service account (`FIREBASE_SERVICE_ACCOUNT_KEY`)
+- Razorpay keys (if using payments)
+- `NEXT_PUBLIC_APP_URL` (your Vercel URL)
+
+**⚠️ Important for Vercel:**
+- Use inline JSON string for `FIREBASE_SERVICE_ACCOUNT_KEY` (not file path)
+- Update Firebase Authorized Domains with your Vercel domain
+- Configure Razorpay webhook URL to point to your Vercel deployment
+
+---
+
 ## 📚 Documentation
 
-Comprehensive documentation available in the `docs/` directory:
+Comprehensive documentation available:
 
+- [`VERCEL_DEPLOYMENT.md`](VERCEL_DEPLOYMENT.md) - **Complete Vercel deployment guide**
 - [`QUICK_START.md`](QUICK_START.md) - Quick setup guide
 - [`FIREBASE_SETUP_CHECKLIST.md`](FIREBASE_SETUP_CHECKLIST.md) - Firebase configuration
 - [`RAZORPAY_QUICKSTART.md`](RAZORPAY_QUICKSTART.md) - Payment integration
