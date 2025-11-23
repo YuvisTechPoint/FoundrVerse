@@ -357,7 +357,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
                           src="/images/mewayz.jpeg"
                           alt="Mewayz Logo"
                           fill
-                          className="object-contain"
+                          className="object-contain rounded-lg"
                           sizes="32px"
                         />
                       </div>
@@ -489,7 +489,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
                           src="/images/mewayz.jpeg"
                           alt="Mewayz Logo"
                           fill
-                          className="object-contain"
+                          className="object-contain rounded-lg"
                           sizes="32px"
                         />
                       </div>

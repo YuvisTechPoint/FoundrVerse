@@ -12,6 +12,8 @@ import { useToast } from "@/components/ui/use-toast";
 import GoogleSignIn from "@/components/auth/GoogleSignIn";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,13 +26,23 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    trigger,
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+    mode: "onBlur",
   });
+
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
 
   useEffect(() => {
     let active = true;
@@ -47,6 +59,26 @@ export default function LoginPage() {
     };
   }, [router]);
 
+  // Real-time email validation
+  const validateEmail = async () => {
+    if (emailTouched) {
+      await trigger("email");
+    }
+  };
+
+  // Real-time password validation
+  const validatePassword = async () => {
+    if (passwordTouched) {
+      await trigger("password");
+    }
+  };
+
+  // Check if email is valid format
+  const isValidEmailFormat = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
@@ -55,7 +87,7 @@ export default function LoginPage() {
       // Sign in with email and password
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        data.email,
+        data.email.trim(),
         data.password
       );
 
@@ -72,28 +104,38 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create session");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create session");
       }
+
+      const result = await response.json();
 
       toast({
         title: "Login successful",
-        description: "Welcome back!",
+        description: `Welcome back, ${result.data?.user?.displayName || result.data?.user?.email || "User"}!`,
       });
 
-      router.push("/dashboard");
-      router.refresh();
+      // Small delay for better UX
+      setTimeout(() => {
+        router.push("/dashboard");
+        router.refresh();
+      }, 500);
     } catch (error: any) {
       console.error("Login error:", error);
       
       let errorMessage = "Invalid credentials. Please try again.";
       if (error.code === "auth/user-not-found") {
-        errorMessage = "No account found with this email";
+        errorMessage = "No account found with this email address";
       } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Incorrect password";
+        errorMessage = "Incorrect password. Please try again.";
       } else if (error.code === "auth/invalid-credential") {
-        errorMessage = "Invalid email or password";
+        errorMessage = "Invalid email or password. Please check your credentials.";
       } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address";
+        errorMessage = "Invalid email address format";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage = "Too many failed attempts. Please try again later.";
+      } else if (error.code === "auth/user-disabled") {
+        errorMessage = "This account has been disabled. Please contact support.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -120,7 +162,7 @@ export default function LoginPage() {
                 src="/images/mewayz.jpeg"
                 alt="Mewayz FoundrVerse Logo"
                 fill
-                className="object-contain"
+                className="object-contain rounded-lg"
                 sizes="64px"
                 priority
               />
@@ -134,47 +176,175 @@ export default function LoginPage() {
           <p className="mt-3 text-gray-600 dark:text-gray-300 transition-colors duration-300">Sign in to your account</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl p-10 transition-colors duration-300">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl p-10 transition-colors duration-300"
+        >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
                 Email
               </label>
-              <input
-                {...register("email")}
-                type="email"
-                id="email"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="your@email.com"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
-              )}
+              <div className="relative">
+                <input
+                  {...register("email")}
+                  type="email"
+                  id="email"
+                  onBlur={() => {
+                    setEmailTouched(true);
+                    validateEmail();
+                  }}
+                  onChange={() => {
+                    if (emailTouched) {
+                      validateEmail();
+                    }
+                  }}
+                  className={`w-full px-4 py-3 pr-10 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:border-transparent transition-all placeholder-gray-400 dark:placeholder-gray-500 ${
+                    errors.email
+                      ? "border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500"
+                      : emailTouched && emailValue && isValidEmailFormat(emailValue)
+                      ? "border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-gray-900 dark:focus:ring-gray-400"
+                  }`}
+                  placeholder="your@email.com"
+                  disabled={isLoading}
+                />
+                <AnimatePresence>
+                  {emailTouched && emailValue && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {errors.email ? (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      ) : isValidEmailFormat(emailValue) ? (
+                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      ) : null}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <AnimatePresence>
+                {errors.email && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    {errors.email.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
+            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
                 Password
               </label>
-              <input
-                {...register("password")}
-                type="password"
-                id="password"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="••••••••"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+              <div className="relative">
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  onBlur={() => {
+                    setPasswordTouched(true);
+                    validatePassword();
+                  }}
+                  onChange={() => {
+                    if (passwordTouched) {
+                      validatePassword();
+                    }
+                  }}
+                  className={`w-full px-4 py-3 pr-10 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:border-transparent transition-all placeholder-gray-400 dark:placeholder-gray-500 ${
+                    errors.password
+                      ? "border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500"
+                      : passwordTouched && passwordValue && passwordValue.length >= 6
+                      ? "border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-gray-900 dark:focus:ring-gray-400"
+                  }`}
+                  placeholder="••••••••"
+                  disabled={isLoading}
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  <AnimatePresence>
+                    {passwordTouched && passwordValue && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0 }}
+                      >
+                        {errors.password ? (
+                          <XCircle className="w-5 h-5 text-red-500" />
+                        ) : passwordValue.length >= 6 ? (
+                          <CheckCircle2 className="w-5 h-5 text-green-500" />
+                        ) : null}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <AnimatePresence>
+                {errors.password && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    {errors.password.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+              {passwordTouched && passwordValue && !errors.password && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-1 text-sm text-green-600 dark:text-green-400 flex items-center gap-1"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Password looks good
+                </motion.p>
               )}
             </div>
 
-            <button
+            {/* Submit Button */}
+            <motion.button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 py-3.5 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              whileHover={!isLoading ? { scale: 1.02 } : {}}
+              whileTap={!isLoading ? { scale: 0.98 } : {}}
+              className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 py-3.5 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </button>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </motion.button>
           </form>
 
           <div className="mt-8">
@@ -208,9 +378,9 @@ export default function LoginPage() {
               Admin Login
             </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+      </div>
     </div>
   );
 }

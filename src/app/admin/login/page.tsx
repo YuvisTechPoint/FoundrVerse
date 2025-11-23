@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
                 src="/images/mewayz.jpeg"
                 alt="Mewayz FoundrVerse Logo"
                 fill
-                className="object-contain"
+                className="object-contain rounded-lg"
                 sizes="64px"
                 priority
               />

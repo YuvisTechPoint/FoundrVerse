@@ -28,21 +28,76 @@ export default function CourseBreakdown() {
             {weeks.map((x, index) => (
               <motion.div
                 key={x.w}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-gold hover:-translate-y-1"
+                transition={{ 
+                  duration: 0.5, 
+                  delay: index * 0.15,
+                  type: "spring",
+                  stiffness: 100
+                }}
+                whileHover={{ 
+                  y: -5,
+                  scale: 1.02,
+                  transition: { duration: 0.3 }
+                }}
+                className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-gold relative overflow-hidden group"
               >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-20 h-20 rounded-xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal flex items-center justify-center font-bold text-xl shadow-md">
+                {/* Animated background gradient */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  initial={false}
+                />
+                
+                <div className="flex items-start gap-4 relative z-10">
+                  <motion.div
+                    className="flex-shrink-0 w-20 h-20 rounded-xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal flex items-center justify-center font-bold text-xl shadow-md"
+                    whileHover={{ 
+                      scale: 1.1,
+                      rotate: [0, -5, 5, -5, 0],
+                      transition: { duration: 0.5 }
+                    }}
+                    animate={{
+                      boxShadow: [
+                        "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        "0 10px 15px -3px rgba(246, 179, 54, 0.4)",
+                        "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      ],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: index * 0.2
+                    }}
+                  >
                     {index + 1}
-                  </div>
+                  </motion.div>
                   <div className="flex-1 pt-1">
-                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{x.w}</span>
-                    <p className="text-lg text-charcoal dark:text-white mt-1 font-semibold">{x.d}</p>
+                    <motion.span
+                      className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block"
+                      whileHover={{ x: 5 }}
+                    >
+                      {x.w}
+                    </motion.span>
+                    <motion.p
+                      className="text-lg text-charcoal dark:text-white mt-1 font-semibold"
+                      whileHover={{ x: 5 }}
+                    >
+                      {x.d}
+                    </motion.p>
                   </div>
                 </div>
+                
+                {/* Progress indicator line */}
+                <motion.div
+                  className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-gold to-purple-500"
+                  initial={{ width: 0 }}
+                  whileInView={{ width: "100%" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.15 + 0.3 }}
+                />
               </motion.div>
             ))}
           </div>
@@ -117,14 +172,37 @@ export default function CourseBreakdown() {
           </motion.div>
         </div>
         
-        <div className="text-center">
-          <Link
-            href="/signup"
-            className="inline-block bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="text-center"
+        >
+          <motion.div
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            Let's Build Your Startup
-          </Link>
-        </div>
+            <Link
+              href="/signup"
+              className="inline-block bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden group"
+            >
+              <motion.span
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{
+                  x: ["-100%", "100%"],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatDelay: 2,
+                  ease: "linear"
+                }}
+              />
+              <span className="relative z-10">Let's Build Your Startup</span>
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

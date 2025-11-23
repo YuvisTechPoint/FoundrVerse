@@ -54,38 +54,124 @@ export default function WhatStudentsGet() {
           {items.map(({ icon: Icon, title, desc }, index) => (
             <motion.div
               key={title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-gold dark:hover:border-gold/50"
+              transition={{ 
+                duration: 0.5, 
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 100
+              }}
+              whileHover={{ 
+                y: -8,
+                scale: 1.02,
+                transition: { duration: 0.3 }
+              }}
+              className="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm transition-all duration-300 hover:shadow-2xl hover:border-gold dark:hover:border-gold/50 relative overflow-hidden"
             >
-              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal group-hover:scale-110 transition-transform duration-300 shadow-md">
+              {/* Animated background gradient on hover */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                initial={false}
+              />
+              
+              <motion.div
+                className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal shadow-md relative z-10"
+                whileHover={{ 
+                  scale: 1.15,
+                  rotate: [0, -10, 10, -10, 0],
+                  transition: { duration: 0.5 }
+                }}
+                animate={{
+                  boxShadow: [
+                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    "0 10px 15px -3px rgba(246, 179, 54, 0.4)",
+                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
                 <Icon size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-charcoal dark:text-white mb-3 transition-colors duration-300">{title}</h3>
-              <p className="text-[15px] text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300">{desc}</p>
+              </motion.div>
+              
+              <h3 className="text-xl font-bold text-charcoal dark:text-white mb-3 transition-colors duration-300 relative z-10">
+                {title}
+              </h3>
+              <p className="text-[15px] text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 relative z-10">
+                {desc}
+              </p>
+              
+              {/* Decorative corner element */}
+              <motion.div
+                className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gold/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                initial={false}
+              />
             </motion.div>
           ))}
         </div>
         
-        <div className="text-center space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center space-y-6"
+        >
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/signup"
-              className="inline-block bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Start Learning
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-block border-2 border-gray-900 dark:border-gray-300 text-gray-900 dark:text-gray-300 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+              <Link
+                href="/signup"
+                className="inline-block bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden group"
+              >
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  animate={{
+                    x: ["-100%", "100%"],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                    ease: "linear"
+                  }}
+                />
+                <span className="relative z-10">Start Learning</span>
+              </Link>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Get Certified
-            </Link>
+              <Link
+                href="/signup"
+                className="inline-block border-2 border-gray-900 dark:border-gray-300 text-gray-900 dark:text-gray-300 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+              >
+                Get Certified
+              </Link>
+            </motion.div>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">Learn from founders, not professors.</p>
-        </div>
+          <motion.p
+            className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300"
+            animate={{
+              opacity: [0.7, 1, 0.7],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            Learn from founders, not professors.
+          </motion.p>
+        </motion.div>
       </div>
     </section>
   );

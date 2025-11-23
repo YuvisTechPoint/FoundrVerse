@@ -35,14 +35,55 @@ export default function BlindSpot() {
             {points.map((p, index) => (
               <motion.div
                 key={p}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: -30, scale: 0.9 }}
+                whileInView={{ opacity: 1, x: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="group relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                transition={{ 
+                  duration: 0.5, 
+                  delay: index * 0.1,
+                  type: "spring",
+                  stiffness: 100
+                }}
+                whileHover={{ 
+                  x: 5,
+                  scale: 1.02,
+                  transition: { duration: 0.3 }
+                }}
+                className="group relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-red-500/50 overflow-hidden"
               >
-                <div className="absolute -left-2 -top-2 h-3 w-3 rounded-full bg-red-500" />
-                <p className="text-gray-800 dark:text-gray-200 font-medium text-[15px] leading-relaxed pl-4 transition-colors duration-300">{p}</p>
+                {/* Animated background on hover */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  initial={false}
+                />
+                
+                {/* Pulsing red dot */}
+                <motion.div
+                  className="absolute -left-2 -top-2 h-3 w-3 rounded-full bg-red-500"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [1, 0.7, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: index * 0.2,
+                    ease: "easeInOut"
+                  }}
+                />
+                
+                {/* Animated line indicator */}
+                <motion.div
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-red-500"
+                  initial={{ scaleY: 0 }}
+                  whileInView={{ scaleY: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
+                />
+                
+                <p className="text-gray-800 dark:text-gray-200 font-medium text-[15px] leading-relaxed pl-4 transition-colors duration-300 relative z-10">
+                  {p}
+                </p>
               </motion.div>
             ))}
           </div>

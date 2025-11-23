@@ -45,48 +45,99 @@ export default function Navbar() {
     }`}>
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="flex h-20 items-center justify-between">
-          <Link 
-            href="/" 
-            className="flex items-center gap-3 transition-colors text-gray-900 dark:text-white group"
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            {/* Logo Image */}
-            <div className="relative w-12 h-12 flex-shrink-0">
-              <Image
-                src="/images/mewayz.jpeg"
-                alt="Mewayz FoundrVerse Logo"
-                fill
-                className="object-contain rounded-lg group-hover:opacity-90 transition-opacity"
-                sizes="48px"
-                priority
-              />
-            </div>
-            {/* Text */}
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight leading-tight">Mewayz</span>
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider leading-tight">FoundrVerse</span>
-            </div>
-          </Link>
+            <Link 
+              href="/" 
+              className="flex items-center gap-3 transition-colors text-gray-900 dark:text-white group"
+            >
+              {/* Logo Image */}
+              <motion.div 
+                className="relative w-12 h-12 flex-shrink-0"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Image
+                  src="/images/mewayz.jpeg"
+                  alt="Mewayz FoundrVerse Logo"
+                  fill
+                  className="object-contain rounded-lg group-hover:opacity-90 transition-opacity"
+                  sizes="48px"
+                  priority
+                />
+              </motion.div>
+              {/* Text */}
+              <div className="flex flex-col">
+                <motion.span 
+                  className="text-xl font-bold tracking-tight leading-tight"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  Mewayz
+                </motion.span>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider leading-tight">FoundrVerse</span>
+              </div>
+            </Link>
+          </motion.div>
           <nav className="flex items-center gap-3">
-            <Link 
-              href="/#pricing" 
-              onClick={handlePricingClick}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors"
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
             >
-              Pricing
-            </Link>
-            <Link 
-              href="/login" 
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors"
+              <Link 
+                href="/#pricing" 
+                onClick={handlePricingClick}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group"
+              >
+                Pricing
+                <motion.span
+                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
+                  initial={{ width: 0 }}
+                  whileHover={{ width: "100%" }}
+                />
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
-              Login / Signup
-            </Link>
-            <ThemeToggle />
-            <Link 
-              href="/signup" 
-              className="rounded-xl bg-gradient-to-r from-gold to-[#f9c866] text-charcoal px-6 py-2.5 text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+              <Link 
+                href="/login" 
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group"
+              >
+                Login / Signup
+                <motion.span
+                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
+                  initial={{ width: 0 }}
+                  whileHover={{ width: "100%" }}
+                />
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
-              Get Started
-            </Link>
+              <ThemeToggle />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.4, type: "spring" }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link 
+                href="/signup" 
+                className="rounded-xl bg-gradient-to-r from-gold to-[#f9c866] text-charcoal px-6 py-2.5 text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                Get Started
+              </Link>
+            </motion.div>
           </nav>
         </div>
       </div>

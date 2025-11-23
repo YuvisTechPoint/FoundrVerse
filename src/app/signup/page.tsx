@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import GoogleSignIn from "@/components/auth/GoogleSignIn";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 
 const signupSchema = z.object({
@@ -54,6 +54,12 @@ export default function SignupPage() {
         displayName: data.name,
       });
 
+      // Send email verification
+      await sendEmailVerification(userCredential.user, {
+        url: `${window.location.origin}/login?verified=true`,
+        handleCodeInApp: false,
+      });
+
       // Get ID token after profile update
       const idToken = await userCredential.user.getIdToken(true);
 
@@ -89,11 +95,14 @@ export default function SignupPage() {
       }
 
       toast({
-        title: "Account created",
-        description: "Redirecting to payment...",
+        title: "Account created successfully!",
+        description: "Please check your email to verify your account. A verification email has been sent.",
       });
 
-      router.push("/payment");
+      // Still allow them to proceed, but show verification notice
+      setTimeout(() => {
+        router.push("/payment");
+      }, 2000);
     } catch (error: any) {
       console.error("Signup error:", error);
       
@@ -128,7 +137,7 @@ export default function SignupPage() {
                 src="/images/mewayz.jpeg"
                 alt="Mewayz FoundrVerse Logo"
                 fill
-                className="object-contain"
+                className="object-contain rounded-lg"
                 sizes="64px"
                 priority
               />

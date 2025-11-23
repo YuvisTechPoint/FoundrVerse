@@ -55,7 +55,7 @@ export default function Sidebar() {
                 src="/images/mewayz.jpeg"
                 alt="Mewayz FoundrVerse Logo"
                 fill
-                className="object-contain rounded"
+                className="object-contain rounded-lg"
                 sizes="40px"
               />
             </div>

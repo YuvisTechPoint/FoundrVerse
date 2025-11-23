@@ -83,7 +83,7 @@ export default async function DashboardPage() {
                 src="/images/mewayz.jpeg"
                 alt="Mewayz FoundrVerse Logo"
                 fill
-                className="object-contain"
+                className="object-contain rounded-lg"
                 sizes="(max-width: 768px) 64px, 80px"
                 priority
               />
