@@ -92,7 +92,6 @@ export default function BlindSpot() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
             className="relative rounded-3xl overflow-hidden aspect-[4/3]"
             style={{ 
               perspective: "1200px",
