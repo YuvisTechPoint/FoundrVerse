@@ -63,10 +63,11 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   });
 
   // Store refund record
+  const refundAmount = (refund.amount as number) || 0;
   addRefund(paymentId, {
     refundId: refund.id,
     paymentId,
-    amount: refund.amount / 100,
+    amount: refundAmount / 100,
     status: refund.status === 'processed' ? 'processed' : 'pending',
     reason: reason || (refund.notes as { comment?: string })?.comment || 'Refund requested',
   });
@@ -74,15 +75,15 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   logger.info('Refund created successfully', {
     refundId: refund.id,
     paymentId,
-    amount: refund.amount / 100,
+    amount: refundAmount / 100,
   });
 
   return successResponse({
     refundId: refund.id,
     paymentId,
-    amount: refund.amount / 100,
+    amount: refundAmount / 100,
     status: refund.status,
-    createdAt: new Date((refund.created_at as number) * 1000).toISOString(),
+    createdAt: new Date().toISOString(), // Use current time since refund was just created
   });
 });
 
