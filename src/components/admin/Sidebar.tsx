@@ -96,7 +96,7 @@ export default function Sidebar() {
                 <PremiumIcon 
                   icon={Icon} 
                   size={20} 
-                  variant="gradient"
+                  variant="luxury"
                   animated={false}
                   className="!p-1.5"
                 />

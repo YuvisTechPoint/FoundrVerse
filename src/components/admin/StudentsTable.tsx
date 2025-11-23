@@ -150,7 +150,9 @@ export default function StudentsTable() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-charcoal">{student.name}</span>
                       {student.topPerformer && (
-                        <Award className="w-4 h-4 text-gold" title="Top Performer" />
+                        <span title="Top Performer">
+                          <Award className="w-4 h-4 text-gold" />
+                        </span>
                       )}
                     </div>
                   </td>
