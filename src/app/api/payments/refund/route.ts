@@ -61,8 +61,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       'REFUND_FAILED'
     );
   });
-
-  // Store refund record
+  
   // Handle potentially undefined amount with proper type checking
   const refundAmountInPaise = (refund.amount !== undefined && refund.amount !== null) 
     ? (refund.amount as number) 
