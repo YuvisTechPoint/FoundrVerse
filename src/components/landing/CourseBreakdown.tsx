@@ -107,7 +107,6 @@ export default function CourseBreakdown() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
             className="relative rounded-3xl overflow-hidden"
             style={{ 
               perspective: "1200px",
@@ -121,6 +120,9 @@ export default function CourseBreakdown() {
               rotateX: [0, -0.5, 0.5, 0],
             }}
             transition={{
+              opacity: {
+                duration: 0.6
+              },
               rotateY: {
                 duration: 8,
                 repeat: Infinity,
