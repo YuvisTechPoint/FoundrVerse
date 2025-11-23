@@ -114,8 +114,7 @@ export default function CourseBreakdown() {
               transformStyle: "preserve-3d",
             }}
             whileHover={{ 
-              scale: 1.02,
-              transition: { duration: 0.3 }
+              scale: 1.02
             }}
             animate={{
               rotateY: [0, 1.5, -1.5, 0],
@@ -131,6 +130,9 @@ export default function CourseBreakdown() {
                 duration: 10,
                 repeat: Infinity,
                 ease: "easeInOut"
+              },
+              scale: {
+                duration: 0.3
               }
             }}
           >
