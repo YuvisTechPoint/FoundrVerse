@@ -63,9 +63,15 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   });
   
   // Handle potentially undefined amount with proper type checking
-  const refundAmountInPaise = (refund.amount !== undefined && refund.amount !== null) 
-    ? (refund.amount as number) 
-    : (amount ? Math.round((typeof amount === 'string' ? parseFloat(amount) : amount) * 100) : 0);
+  // Get amount from refund response or fallback to requested amount or 0
+  let refundAmountInPaise: number;
+  if (refund.amount !== undefined && refund.amount !== null && typeof refund.amount === 'number') {
+    refundAmountInPaise = refund.amount;
+  } else if (amount !== undefined && amount !== null) {
+    refundAmountInPaise = Math.round((typeof amount === 'string' ? parseFloat(amount) : amount) * 100);
+  } else {
+    refundAmountInPaise = 0;
+  }
   
   addRefund(paymentId, {
     refundId: refund.id,
