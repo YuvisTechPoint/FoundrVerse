@@ -62,7 +62,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   });
   
-  // Handle potentially undefined amount with proper type checking
+
   // Get amount from refund response or fallback to requested amount or 0
   let refundAmountInPaise: number;
   if (refund.amount !== undefined && refund.amount !== null && typeof refund.amount === 'number') {
