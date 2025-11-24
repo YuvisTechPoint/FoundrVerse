@@ -98,7 +98,12 @@ const handlePayment = async () => {
         currency: options.currency || 'INR',
         userId: options.userId,
         enrollmentId: options.courseId,
-        metadata: options.metadata,
+        userEmail: options.prefill?.email || options.metadata?.userEmail, // Pass email explicitly
+        metadata: {
+          ...options.metadata,
+          userEmail: options.prefill?.email || options.metadata?.userEmail, // Ensure email in metadata
+          email: options.prefill?.email || options.metadata?.userEmail, // Also as email field
+        },
       }),
     });
 

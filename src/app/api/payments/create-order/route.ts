@@ -64,18 +64,22 @@ export async function POST(request: NextRequest) {
       notes: { userId, enrollmentId, ...metadata },
     });
 
+    // Ensure we have email - try multiple sources
+    const paymentEmail = authenticatedUserEmail || metadata?.userEmail || metadata?.email || body.userEmail || '';
+    
     const payment = createPayment({
       orderId: order.id,
       amount,
       currency: order.currency,
       status: 'created',
       userId: authenticatedUserId, // CRITICAL: Always use authenticated userId from session
-      userEmail: authenticatedUserEmail || metadata?.userEmail || metadata?.email, // Use authenticated email
+      userEmail: paymentEmail, // CRITICAL: Save email for lookup
       courseId: enrollmentId,
       receiptId,
       metadata: {
         ...metadata,
         authenticatedUserId, // Store authenticated ID in metadata
+        authenticatedUserEmail: paymentEmail, // Store authenticated email in metadata
         clientUserId, // Store client-provided ID for reference
         createdAt: new Date().toISOString(),
       },
@@ -88,8 +92,9 @@ export async function POST(request: NextRequest) {
       userId: payment.userId,
       userEmail: payment.userEmail,
       authenticatedUserId,
+      authenticatedUserEmail: paymentEmail,
       status: payment.status,
-      note: 'Payment linked to authenticated user account',
+      note: 'Payment linked to authenticated user account with email',
     });
 
     return NextResponse.json({

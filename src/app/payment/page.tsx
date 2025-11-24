@@ -176,8 +176,13 @@ export default function PaymentPage() {
                       contact: "",
                       name: userName,
                     },
+                    metadata: {
+                      userEmail: userEmail, // CRITICAL: Pass email in metadata
+                      userName: userName,
+                    },
                     notes: {
                       course: "30-Day Startup Blueprint",
+                      userEmail: userEmail, // Also in notes for Razorpay
                     },
                     onSuccess: handlePaymentSuccess,
                     onError: handlePaymentError,

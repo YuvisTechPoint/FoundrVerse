@@ -90,6 +90,36 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       }
     }
     
+    // CRITICAL: Try to find payment by email if order not found
+    // This handles cases where payment was created but order ID doesn't match
+    if (!payment && authenticatedUserEmail) {
+      const emailPayments = getAllPayments().filter(
+        p => p.userEmail === authenticatedUserEmail && 
+        (!p.paymentId || p.paymentId === razorpay_payment_id)
+      );
+      if (emailPayments.length > 0) {
+        // Find the most recent unpaid payment for this email
+        const unpaidPayment = emailPayments
+          .filter(p => p.status === 'created' || p.status === 'authorized')
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+        
+        if (unpaidPayment) {
+          logger.info('Found payment by email, linking to authenticated account', {
+            paymentId: unpaidPayment.id,
+            email: authenticatedUserEmail,
+            orderId: unpaidPayment.orderId,
+          });
+          payment = unpaidPayment;
+          // Update payment with correct order ID and link to authenticated account
+          updatePayment(payment.id, {
+            orderId: razorpay_order_id,
+            userId: authenticatedUserId,
+            userEmail: authenticatedUserEmail,
+          });
+        }
+      }
+    }
+    
     // If still not found, create a new payment record as fallback
     // This can happen if the server restarted and lost in-memory data
     if (!payment) {
@@ -185,15 +215,27 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     });
   }
   
-  // Update payment record - use authenticated userId to ensure sync
+  // Ensure we have email - prioritize authenticated email, fallback to payment email
+  const finalUserEmail = authenticatedUserEmail || payment.userEmail || '';
+  
+  // Update payment record - use authenticated userId and email to ensure sync
   const updatedPayment = updatePaymentByOrderId(razorpay_order_id, {
     paymentId: razorpay_payment_id,
     status: 'paid',
     paidAt: new Date().toISOString(),
     // CRITICAL: Always use authenticated userId to ensure payment is linked to account
     userId: authenticatedUserId,
-    userEmail: authenticatedUserEmail || payment.userEmail,
+    // CRITICAL: Always save email for proper account linking
+    userEmail: finalUserEmail,
   });
+  
+  if (!finalUserEmail) {
+    logger.warn('Payment updated without email - may cause lookup issues', {
+      orderId: razorpay_order_id,
+      authenticatedUserId,
+      note: 'Email should be set during payment creation or verification'
+    });
+  }
 
   if (!updatedPayment) {
     logger.error('Failed to update payment record', {
@@ -208,7 +250,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     orderId: razorpay_order_id,
     paymentId: razorpay_payment_id,
     userId: updatedPayment.userId,
+    userEmail: updatedPayment.userEmail,
     authenticatedUserId,
+    authenticatedUserEmail,
     status: updatedPayment.status,
     paidAt: updatedPayment.paidAt,
   });
@@ -250,7 +294,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     revalidatePath('/pitch');
     revalidatePath('/certificate');
   } catch (revalidateError) {
-    logger.warn('Failed to revalidate paths', revalidateError);
+    logger.warn('Failed to revalidate paths', {
+      error: revalidateError instanceof Error ? revalidateError.message : String(revalidateError),
+    });
   }
 
   // TODO: Trigger enrollment activation here

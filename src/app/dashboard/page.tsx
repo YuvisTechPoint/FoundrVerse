@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { CheckCircle, BookOpen, Users, Award, LogOut, Code, Briefcase, Users2, Megaphone, Calendar, Clock, ShoppingCart, XCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { verifySessionCookie } from "@/lib/verifySession";
 import { getMockUser } from "@/data/users-mock";
-import { getPaymentsByUserId, getAllPayments, getPaymentsByEmail } from "@/data/payments-mock";
+import { getPaymentsByUserId, getAllPayments, getPaymentsByEmail, updatePayment } from "@/data/payments-mock";
 import { getCourseProgress } from "@/data/course-progress-mock";
 import LiveCoursesSection from "@/components/dashboard/LiveCoursesSection";
 import RecordedCoursesSection from "@/components/dashboard/RecordedCoursesSection";
@@ -50,21 +50,61 @@ export default async function DashboardPage() {
   // Check if user has purchased the course
   // Use authenticated userId directly (same as used in payment creation/verification)
   const authenticatedUserId = decoded.uid;
-  const userPayments = getPaymentsByUserId(authenticatedUserId);
+  const authenticatedUserEmail = decoded.email || user.email;
+  
+  // First, try to find payments by userId
+  let userPayments = getPaymentsByUserId(authenticatedUserId);
+  
+  // CRITICAL: Also check by email to auto-sync payments from different accounts
+  // This handles cases where user paid with different account but same email
+  if (authenticatedUserEmail) {
+    const emailPayments = getPaymentsByEmail(authenticatedUserEmail);
+    
+    // Auto-sync: Update payments found by email to current userId if they don't have userId or have different userId
+    for (const payment of emailPayments) {
+      if (payment.userEmail === authenticatedUserEmail && 
+          (!payment.userId || payment.userId !== authenticatedUserId)) {
+        // Auto-link payment to current authenticated account
+        updatePayment(payment.id, {
+          userId: authenticatedUserId,
+          userEmail: authenticatedUserEmail,
+        });
+        console.log('[Dashboard] Auto-synced payment to account:', {
+          paymentId: payment.id,
+          oldUserId: payment.userId,
+          newUserId: authenticatedUserId,
+          email: authenticatedUserEmail,
+        });
+      }
+    }
+    
+    // Merge email payments with userId payments (avoid duplicates)
+    const emailPaymentIds = new Set(userPayments.map((p: { id: string }) => p.id));
+    const newEmailPayments = emailPayments.filter((p: { id: string }) => !emailPaymentIds.has(p.id));
+    userPayments = [...userPayments, ...newEmailPayments];
+  }
   
   let hasPurchased = userPayments.some(
-    (payment) => payment.status === "paid" || payment.status === "captured" || payment.status === "authorized"
+    (payment: { status: string }) => payment.status === "paid" || payment.status === "captured" || payment.status === "authorized"
   );
   
-  // Fallback: If no payments found by userId, try by email (for backward compatibility)
-  let finalUserPayments = userPayments;
-  if (!hasPurchased && user.email) {
-    const emailPayments = getPaymentsByEmail(user.email);
-    const paidEmailPayments = emailPayments.filter(
-      (p) => p.status === "paid" || p.status === "captured" || p.status === "authorized"
+  // Final check: If still no purchase found, check all payments by email one more time
+  if (!hasPurchased && authenticatedUserEmail) {
+    const allEmailPayments = getPaymentsByEmail(authenticatedUserEmail);
+    const paidEmailPayments = allEmailPayments.filter(
+      (p: { status: string }) => p.status === "paid" || p.status === "captured" || p.status === "authorized"
     );
     if (paidEmailPayments.length > 0) {
-      finalUserPayments = paidEmailPayments;
+      // Auto-sync these payments
+      for (const payment of paidEmailPayments) {
+        if (!payment.userId || payment.userId !== authenticatedUserId) {
+          updatePayment(payment.id, {
+            userId: authenticatedUserId,
+            userEmail: authenticatedUserEmail,
+          });
+        }
+      }
+      userPayments = [...userPayments, ...paidEmailPayments];
       hasPurchased = true;
     }
   }
@@ -73,17 +113,22 @@ export default async function DashboardPage() {
   if (process.env.NODE_ENV === 'development') {
     console.log('[Dashboard] Purchase Status Check:', {
       authenticatedUserId,
-      userEmail: user.email,
+      authenticatedUserEmail,
       totalPayments: userPayments.length,
-      paidPayments: userPayments.filter(p => p.status === "paid" || p.status === "captured" || p.status === "authorized").length,
+      paidPayments: userPayments.filter((p: { status: string }) => p.status === "paid" || p.status === "captured" || p.status === "authorized").length,
       hasPurchased,
-      allPaymentStatuses: userPayments.map(p => ({ id: p.id, status: p.status, userId: p.userId }))
+      allPaymentStatuses: userPayments.map((p: { id: string; status: string; userId?: string; userEmail?: string }) => ({ 
+        id: p.id, 
+        status: p.status, 
+        userId: p.userId,
+        userEmail: p.userEmail 
+      }))
     });
   }
   
-  const latestPayment = finalUserPayments
-    .filter((p) => p.status === "paid" || p.status === "captured" || p.status === "authorized")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  const latestPayment = userPayments
+    .filter((p: { status: string; createdAt: string }) => p.status === "paid" || p.status === "captured" || p.status === "authorized")
+    .sort((a: { createdAt: string }, b: { createdAt: string }) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
 
   // Get course progress
   const courseProgress = getCourseProgress(decoded.uid);
