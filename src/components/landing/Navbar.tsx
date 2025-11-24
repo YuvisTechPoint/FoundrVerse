@@ -6,11 +6,12 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, BookOpen } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Check authentication status
+  // Check authentication status and purchase status
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -29,9 +30,11 @@ export default function Navbar() {
         if (response.ok) {
           const data = await response.json();
           setIsAuthenticated(data.authenticated || false);
+          setHasPurchased(data.hasPurchased || false);
         }
       } catch (error) {
         setIsAuthenticated(false);
+        setHasPurchased(false);
       }
     };
     checkAuth();
@@ -120,24 +123,46 @@ export default function Navbar() {
                 </Link>
               </motion.div>
             )}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Link 
-                href="/#pricing" 
-                onClick={handlePricingClick}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group"
+            {!hasPurchased && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
               >
-                Pricing
-                <motion.span
-                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: "100%" }}
-                />
-              </Link>
-            </motion.div>
+                <Link 
+                  href="/#pricing" 
+                  onClick={handlePricingClick}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group"
+                >
+                  Pricing
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: "100%" }}
+                  />
+                </Link>
+              </motion.div>
+            )}
+            {hasPurchased && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Link 
+                  href="/dashboard" 
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group flex items-center gap-2"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Course
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: "100%" }}
+                  />
+                </Link>
+              </motion.div>
+            )}
             {!isAuthenticated && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -172,10 +197,10 @@ export default function Navbar() {
               whileTap={{ scale: 0.95 }}
             >
               <Link 
-                href="/signup" 
+                href={isAuthenticated ? "/dashboard" : "/signup"} 
                 className="rounded-xl bg-gradient-to-r from-gold via-[#f9c866] to-[#fcd34d] text-charcoal px-6 py-2.5 text-sm font-bold shadow-premium hover:shadow-premium-lg transition-all duration-300 border border-white/30 backdrop-blur-sm"
               >
-                Get Started
+                {isAuthenticated ? "Go To Course" : "Get Started"}
               </Link>
             </motion.div>
           </nav>

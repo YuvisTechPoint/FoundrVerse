@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 const adminLoginSchema = z.object({
   organizationName: z.string().min(2, "Organization/College name must be at least 2 characters"),
@@ -21,6 +25,9 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  
   const {
     register,
     handleSubmit,
@@ -29,24 +36,113 @@ export default function AdminLoginPage() {
     resolver: zodResolver(adminLoginSchema),
   });
 
+  // Check if already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.user?.customClaims?.admin) {
+            router.replace("/admin/dashboard");
+          }
+        }
+      } catch (error) {
+        // Not authenticated, continue to login page
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   const onSubmit = async (data: AdminLoginForm) => {
     setIsLoading(true);
     try {
-      // TODO: Implement actual admin login logic (Clerk/NextAuth)
-      // For now, set mock admin flag and organization name in localStorage
-      localStorage.setItem("isAdmin", "true");
-      localStorage.setItem("adminOrganization", data.organizationName);
-      localStorage.setItem("adminEmail", data.email);
-      
+      const auth = getFirebaseAuth();
+
+      // Sign in with email and password
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        data.email.trim(),
+        data.password
+      );
+
+      // Get ID token
+      const idToken = await userCredential.user.getIdToken();
+
+      // Create admin session with organization verification
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken,
+          organizationName: data.organizationName.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || "Failed to create admin session");
+      }
+
+      const result = await response.json();
+
+      // Create session cookie (admin login returns sessionCookie directly)
+      if (result.data?.sessionCookie) {
+        // Session cookie is set by the API route via Set-Cookie header
+        // No need to manually set it
+      } else {
+        // Fallback: create session using the idToken
+        const sessionResponse = await fetch("/api/auth/session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken }),
+        });
+
+        if (!sessionResponse.ok) {
+          throw new Error("Failed to create session");
+        }
+      }
+
+      // Show success state immediately
+      setLoginSuccess(true);
+      setRedirecting(true);
+
       toast({
         title: "Admin login successful",
-        description: `Welcome to ${data.organizationName} admin dashboard!`,
+        description: `Welcome to ${result.data?.organization?.name || data.organizationName} admin dashboard!`,
+        duration: 3000,
       });
-      router.push("/admin/dashboard");
-    } catch (error) {
+
+      // Real-time redirect with visual feedback
+      setTimeout(() => {
+        router.push("/admin/dashboard");
+        router.refresh();
+      }, 1500);
+    } catch (error: any) {
+      console.error("Admin login error:", error);
+
+      // Reset success state on error
+      setLoginSuccess(false);
+      setRedirecting(false);
+
+      let errorMessage = "Invalid credentials. Please try again.";
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No admin account found with this email address";
+      } else if (error.code === "auth/wrong-password") {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Login failed",
-        description: "Invalid credentials. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -79,7 +175,72 @@ export default function AdminLoginPage() {
           <p className="mt-3 text-gray-600 dark:text-gray-300 transition-colors duration-300">Sign in to admin dashboard</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl p-10 transition-colors duration-300">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl p-10 transition-colors duration-300 relative">
+          {/* Success Message - Real-time */}
+          <AnimatePresence>
+            {loginSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-50 p-6"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  className="mb-6"
+                >
+                  <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <svg className="w-12 h-12 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </motion.div>
+                <motion.h2
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center"
+                >
+                  Login Successful!
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-gray-600 dark:text-gray-400 mb-6 text-center"
+                >
+                  {redirecting ? "Redirecting to admin dashboard..." : "You're being redirected"}
+                </motion.p>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Link
+                    href="/admin/dashboard"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl"
+                  >
+                    Go to Dashboard
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </motion.div>
+                {redirecting && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-4"
+                  >
+                    <Loader2 className="w-5 h-5 animate-spin text-indigo-600 dark:text-indigo-400" />
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
@@ -131,17 +292,30 @@ export default function AdminLoginPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 py-3.5 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || loginSuccess}
+              className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3.5 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
+            <p className="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+              Don't have an admin account?{" "}
+              <Link href="/admin/signup" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline transition-colors duration-300">
+                Create one
+              </Link>
+            </p>
             <Link
               href="/login"
-              className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline transition-colors duration-300"
+              className="block text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300"
             >
               Student Login
             </Link>

@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { isAbsolute, resolve } from "path";
 import { App, cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
 let firebaseAdminApp: App | null = null;
 
@@ -58,4 +59,9 @@ export function getFirebaseAdminApp() {
 export function getFirebaseAdminAuth() {
   const app = getFirebaseAdminApp();
   return getAuth(app);
+}
+
+export function getFirebaseAdminFirestore() {
+  const app = getFirebaseAdminApp();
+  return getFirestore(app);
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "@/components/admin/Sidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -9,25 +8,10 @@ import OverviewCards from "@/components/admin/OverviewCards";
 import RevenueChart from "@/components/admin/RevenueChart";
 import RegistrationsChart from "@/components/admin/RegistrationsChart";
 import StudentsTable from "@/components/admin/StudentsTable";
+import { useAdminAuth } from "@/lib/useAdminAuth";
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-
-  // Auth check effect
-  useEffect(() => {
-    // TODO: Replace with real auth check (Clerk/NextAuth)
-    // Mock admin check - check localStorage or session cookie
-    const checkAdmin = () => {
-      const adminStatus = localStorage.getItem("isAdmin") === "true";
-      if (!adminStatus) {
-        router.push("/admin/login");
-        return;
-      }
-      setIsAdmin(true);
-    };
-    checkAdmin();
-  }, [router]);
+  const { isAdmin, isLoading } = useAdminAuth();
 
   // Real-time data updates - runs after auth check
   useEffect(() => {
@@ -42,29 +26,19 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, [isAdmin]);
 
-  if (isAdmin === null) {
+  if (isLoading || isAdmin === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Verifying admin access...</p>
+        </div>
       </div>
     );
   }
 
   if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-          <p className="text-gray-600 mb-4">You don't have permission to access this page.</p>
-          <button
-            onClick={() => router.push("/admin/login")}
-            className="px-4 py-2 bg-charcoal text-white rounded-lg hover:bg-gray-800"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
+    return null; // useAdminAuth handles redirect
   }
 
   return (

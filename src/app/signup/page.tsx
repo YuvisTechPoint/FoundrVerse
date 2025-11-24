@@ -128,28 +128,55 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 pt-24 md:pt-32 pb-8 bg-gradient-to-b from-white via-purple-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-gray-900/90">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-flex items-center gap-4 mb-6 transition">
-            <div className="relative w-16 h-16 flex-shrink-0">
-              <Image
-                src="/images/mewayz.jpeg"
-                alt="Mewayz FoundrVerse Logo"
-                fill
-                className="object-contain rounded-lg"
-                sizes="64px"
-                priority
-              />
+    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-gray-900/90">
+      <div className="pt-24 md:pt-32 pb-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-8rem)]">
+            {/* Left Side - Brand Logo */}
+            <div className="hidden lg:flex flex-col items-start justify-center">
+              <Link href="/" className="inline-flex items-center gap-4 mb-8 transition hover:opacity-90">
+                <div className="relative w-24 h-24 md:w-28 md:h-28 flex-shrink-0">
+                  <Image
+                    src="/images/mewayz.jpeg"
+                    alt="Mewayz FoundrVerse Logo"
+                    fill
+                    className="object-contain rounded-lg"
+                    sizes="(max-width: 768px) 96px, 112px"
+                    priority
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">Mewayz</span>
+                  <span className="text-base md:text-lg font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
+                </div>
+              </Link>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">Enroll in 60 seconds</h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-md">Create your account to start your startup journey today</p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white">Mewayz</span>
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
-            </div>
-          </Link>
-          <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-white">Enroll in 60 seconds</h1>
-          <p className="mt-3 text-gray-600 dark:text-gray-300">Create your account to get started</p>
-        </div>
+
+            {/* Right Side - Signup Form */}
+            <div className="w-full max-w-md mx-auto lg:mx-0">
+              {/* Mobile Logo */}
+              <div className="lg:hidden text-center mb-10">
+                <Link href="/" className="inline-flex items-center gap-4 mb-6 transition">
+                  <div className="relative w-16 h-16 flex-shrink-0">
+                    <Image
+                      src="/images/mewayz.jpeg"
+                      alt="Mewayz FoundrVerse Logo"
+                      fill
+                      className="object-contain rounded-lg"
+                      sizes="64px"
+                      priority
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-3xl font-bold text-gray-900 dark:text-white">Mewayz</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
+                  </div>
+                </Link>
+                <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-white">Enroll in 60 seconds</h1>
+                <p className="mt-3 text-gray-600 dark:text-gray-300">Create your account to get started</p>
+              </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -263,6 +290,9 @@ export default function SignupPage() {
                 Sign in
               </Link>
             </p>
+          </div>
+        </div>
+            </div>
           </div>
         </div>
       </div>

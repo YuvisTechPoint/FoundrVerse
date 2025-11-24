@@ -1,38 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Sidebar from "@/components/admin/Sidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { motion } from "framer-motion";
 import { Settings, Bell, Shield, Database, Mail, Key } from "lucide-react";
+import { useAdminAuth } from "@/lib/useAdminAuth";
 
 export default function SettingsPage() {
-  const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const { isAdmin, isLoading } = useAdminAuth();
 
-  useEffect(() => {
-    const checkAdmin = () => {
-      const adminStatus = localStorage.getItem("isAdmin") === "true";
-      if (!adminStatus) {
-        router.push("/admin/login");
-        return;
-      }
-      setIsAdmin(true);
-    };
-    checkAdmin();
-  }, [router]);
-
-  if (isAdmin === null) {
+  if (isLoading || isAdmin === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Verifying admin access...</p>
+        </div>
       </div>
     );
   }
 
   if (!isAdmin) {
-    return null;
+    return null; // useAdminAuth handles redirect
   }
 
   return (

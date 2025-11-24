@@ -165,27 +165,53 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       <Navbar />
       <div className="pt-32 pb-12 px-4">
-      <div className="max-w-md w-full mx-auto">
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-flex items-center gap-4 mb-6 transition">
-            <div className="relative w-16 h-16 flex-shrink-0">
-              <Image
-                src="/images/mewayz.jpeg"
-                alt="Mewayz FoundrVerse Logo"
-                fill
-                className="object-contain rounded-lg"
-                sizes="64px"
-                priority
-              />
+      <div className="max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-8rem)]">
+          {/* Left Side - Brand Logo */}
+          <div className="hidden lg:flex flex-col items-center justify-center text-center lg:text-left lg:items-start">
+            <Link href="/" className="inline-flex items-center gap-4 mb-8 transition hover:opacity-90">
+              <div className="relative w-24 h-24 md:w-28 md:h-28 flex-shrink-0">
+                <Image
+                  src="/images/mewayz.jpeg"
+                  alt="Mewayz FoundrVerse Logo"
+                  fill
+                  className="object-contain rounded-lg"
+                  sizes="(max-width: 768px) 96px, 112px"
+                  priority
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-4xl md:text-5xl text-metallic transition-all duration-300">Mewayz</span>
+                <span className="text-base md:text-lg font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">FoundrVerse</span>
+              </div>
+            </Link>
+            <h1 className="text-5xl md:text-6xl text-metallic mb-4 transition-all duration-300">Student Login</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300 max-w-md">Sign in to your account to continue your startup journey</p>
+          </div>
+
+          {/* Right Side - Login Form */}
+          <div className="w-full max-w-md mx-auto lg:mx-0">
+            {/* Mobile Logo */}
+            <div className="lg:hidden text-center mb-8">
+              <Link href="/" className="inline-flex items-center gap-4 mb-6 transition">
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  <Image
+                    src="/images/mewayz.jpeg"
+                    alt="Mewayz FoundrVerse Logo"
+                    fill
+                    className="object-contain rounded-lg"
+                    sizes="64px"
+                    priority
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-3xl text-metallic transition-all duration-300">Mewayz</span>
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">FoundrVerse</span>
+                </div>
+              </Link>
+              <h1 className="text-4xl text-metallic transition-all duration-300 mb-2">Student Login</h1>
+              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">Sign in to your account</p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Mewayz</span>
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">FoundrVerse</span>
-            </div>
-          </Link>
-          <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Student Login</h1>
-          <p className="mt-3 text-gray-600 dark:text-gray-300 transition-colors duration-300">Sign in to your account</p>
-        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -452,6 +478,8 @@ export default function LoginPage() {
             </Link>
           </div>
         </motion.div>
+          </div>
+        </div>
       </div>
       </div>
     </div>

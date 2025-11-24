@@ -54,10 +54,10 @@ export async function verifyAuth(request: NextRequest): Promise<{
 }
 
 /**
- * Verifies admin access (requires authentication + admin claim)
+ * Verifies admin access (requires authentication + admin claim + organization)
  */
 export async function verifyAdmin(request: NextRequest): Promise<{
-  user: { uid: string; email?: string; name?: string; isAdmin: true };
+  user: { uid: string; email?: string; name?: string; isAdmin: true; organizationId?: string; organizationName?: string };
   error?: never;
 } | {
   user?: never;
@@ -79,10 +79,47 @@ export async function verifyAdmin(request: NextRequest): Promise<{
       };
     }
 
+    // Verify organization exists and is active
+    const organizationId = user.customClaims?.organizationId as string | undefined;
+    if (organizationId) {
+      try {
+        const { getOrganizationById } = await import('@/lib/organizations');
+        const organization = await getOrganizationById(organizationId);
+        
+        if (!organization) {
+          logger.warn('Admin organization not found', { uid: authResult.user.uid, organizationId });
+          return {
+            error: errorResponse('Organization not found', 403),
+          };
+        }
+
+        if (organization.status !== 'active') {
+          logger.warn('Admin organization not active', { uid: authResult.user.uid, organizationId, status: organization.status });
+          return {
+            error: errorResponse('Organization is not active', 403),
+          };
+        }
+
+        return {
+          user: {
+            ...authResult.user,
+            isAdmin: true,
+            organizationId: organization.id,
+            organizationName: organization.name,
+          },
+        };
+      } catch (orgError) {
+        logger.error('Failed to verify organization', orgError);
+        // Continue without organization verification if Firestore fails
+      }
+    }
+
     return {
       user: {
         ...authResult.user,
         isAdmin: true,
+        organizationId: user.customClaims?.organizationId as string | undefined,
+        organizationName: user.customClaims?.organizationName as string | undefined,
       },
     };
   } catch (error) {
