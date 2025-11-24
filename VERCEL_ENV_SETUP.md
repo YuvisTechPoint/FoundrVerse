@@ -1,6 +1,8 @@
-# Vercel Environment Variables Setup
+# Vercel Environment Variables Setup Guide
 
 This guide will help you configure Firebase and other required environment variables in Vercel for your FoundrVerse deployment.
+
+> **⚠️ Important:** After adding environment variables, you **must redeploy** your project for changes to take effect.
 
 ## Required Environment Variables
 
@@ -157,9 +159,51 @@ RAZORPAY_WEBHOOK_SECRET (optional)
 SESSION_COOKIE_SECRET
 ```
 
+## Common Issues After Deployment
+
+### Firebase Error Still Appears
+
+If you see "Google sign-in is currently unavailable" or "Authentication service is temporarily unavailable":
+
+1. ✅ **Verify all Firebase variables are set** - Check that all 7 `NEXT_PUBLIC_FIREBASE_*` variables are present
+2. ✅ **Check for typos** - Variable names are case-sensitive
+3. ✅ **No quotes needed** - Don't wrap values in quotes
+4. ✅ **Redeploy required** - After adding variables, trigger a new deployment
+5. ✅ **Check Firebase Console** - Ensure Google Authentication is enabled
+
+### How to Redeploy
+
+**Option 1: Via Vercel Dashboard**
+1. Go to **Deployments** tab
+2. Click **⋯** (three dots) on latest deployment
+3. Click **Redeploy**
+
+**Option 2: Via Git Push**
+```bash
+git commit --allow-empty -m "Trigger redeploy"
+git push
+```
+
+### Testing Environment Variables
+
+After deployment, you can test if variables are set correctly:
+
+1. Visit your deployed site
+2. Try to sign in with Google
+3. If it works → ✅ Variables are configured correctly
+4. If you see error → Check Vercel logs and verify variables
+
+### Viewing Deployment Logs
+
+1. Go to **Deployments** tab in Vercel
+2. Click on a deployment
+3. Click **Build Logs** or **Function Logs**
+4. Look for Firebase initialization errors
+
 ## Need Help?
 
 - Check `docs/FIREBASE_AUTH.md` for Firebase setup details
 - Check `docs/RAZORPAY.md` for Razorpay setup details
 - Review Vercel documentation: https://vercel.com/docs/concepts/projects/environment-variables
+- Check Firebase Console: https://console.firebase.google.com
 

@@ -138,21 +138,37 @@ export default function LoginPage() {
       setLoginSuccess(false);
       setRedirecting(false);
       
+      const isProduction = process.env.NODE_ENV === 'production';
       let errorMessage = "Invalid credentials. Please try again.";
-      if (error.code === "auth/user-not-found") {
-        errorMessage = "No account found with this email address";
-      } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Incorrect password. Please try again.";
-      } else if (error.code === "auth/invalid-credential") {
-        errorMessage = "Invalid email or password. Please check your credentials.";
-      } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address format";
-      } else if (error.code === "auth/too-many-requests") {
-        errorMessage = "Too many failed attempts. Please try again later.";
-      } else if (error.code === "auth/user-disabled") {
-        errorMessage = "This account has been disabled. Please contact support.";
-      } else if (error.message) {
-        errorMessage = error.message;
+      
+      if (!isProduction) {
+        // Detailed error messages for development
+        if (error.code === "auth/user-not-found") {
+          errorMessage = "No account found with this email address";
+        } else if (error.code === "auth/wrong-password") {
+          errorMessage = "Incorrect password. Please try again.";
+        } else if (error.code === "auth/invalid-credential") {
+          errorMessage = "Invalid email or password. Please check your credentials.";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Invalid email address format";
+        } else if (error.code === "auth/too-many-requests") {
+          errorMessage = "Too many failed attempts. Please try again later.";
+        } else if (error.code === "auth/user-disabled") {
+          errorMessage = "This account has been disabled. Please contact support.";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      } else {
+        // Production-friendly generic messages
+        if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+          errorMessage = "Invalid email or password. Please try again.";
+        } else if (error.code === "auth/too-many-requests") {
+          errorMessage = "Too many failed attempts. Please try again later.";
+        } else if (error.code === "auth/user-disabled") {
+          errorMessage = "This account has been disabled. Please contact support.";
+        } else {
+          errorMessage = "Login failed. Please try again later or contact support.";
+        }
       }
 
       toast({

@@ -155,10 +155,11 @@ export function getFirebaseApp(): FirebaseApp {
         firebaseGlobal.__FIREBASE_APP__ = initializeApp(config);
       } catch (error) {
         console.error("Failed to initialize Firebase app:", error);
-        throw new Error(
-          `Firebase initialization failed: ${error instanceof Error ? error.message : "Unknown error"}. ` +
-          `Please check your Firebase configuration in .env.local`
-        );
+        const isProduction = process.env.NODE_ENV === 'production';
+        const errorMessage = isProduction
+          ? "Authentication service is temporarily unavailable. Please contact support."
+          : `Firebase initialization failed: ${error instanceof Error ? error.message : "Unknown error"}. Please check your Firebase configuration in .env.local or VERCEL_ENV_SETUP.md for Vercel deployment.`;
+        throw new Error(errorMessage);
       }
     }
   }
@@ -181,10 +182,11 @@ export function getFirebaseAuth(): Auth {
       firebaseGlobal.__FIREBASE_AUTH__ = getAuth(app);
     } catch (error) {
       console.error("Failed to get Firebase Auth:", error);
-      throw new Error(
-        `Firebase Auth initialization failed: ${error instanceof Error ? error.message : "Unknown error"}. ` +
-        `This usually means the Firebase app configuration is invalid.`
-      );
+      const isProduction = process.env.NODE_ENV === 'production';
+      const errorMessage = isProduction
+        ? "Authentication service is temporarily unavailable. Please contact support."
+        : `Firebase Auth initialization failed: ${error instanceof Error ? error.message : "Unknown error"}. This usually means the Firebase app configuration is invalid. See VERCEL_ENV_SETUP.md for deployment setup.`;
+      throw new Error(errorMessage);
     }
   }
 

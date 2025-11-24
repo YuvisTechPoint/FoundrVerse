@@ -106,15 +106,31 @@ export default function SignupPage() {
     } catch (error: any) {
       console.error("Signup error:", error);
       
+      const isProduction = process.env.NODE_ENV === 'production';
       let errorMessage = "Something went wrong. Please try again.";
-      if (error.code === "auth/email-already-in-use") {
-        errorMessage = "Email is already registered";
-      } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address";
-      } else if (error.code === "auth/weak-password") {
-        errorMessage = "Password is too weak (minimum 6 characters)";
-      } else if (error.message) {
-        errorMessage = error.message;
+      
+      if (!isProduction) {
+        // Detailed error messages for development
+        if (error.code === "auth/email-already-in-use") {
+          errorMessage = "Email is already registered";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Invalid email address";
+        } else if (error.code === "auth/weak-password") {
+          errorMessage = "Password is too weak (minimum 6 characters)";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      } else {
+        // Production-friendly generic messages
+        if (error.code === "auth/email-already-in-use") {
+          errorMessage = "This email is already registered. Please sign in instead.";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Invalid email address. Please check and try again.";
+        } else if (error.code === "auth/weak-password") {
+          errorMessage = "Password is too weak. Please use a stronger password.";
+        } else {
+          errorMessage = "Signup failed. Please try again later or contact support.";
+        }
       }
 
       toast({
