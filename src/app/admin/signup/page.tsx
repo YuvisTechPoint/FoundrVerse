@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, deleteUser } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Loader2, CheckCircle2, XCircle } from "lucide-react";
@@ -45,8 +45,10 @@ export default function AdminSignupPage() {
 
   const onSubmit = async (data: AdminSignupForm) => {
     setIsLoading(true);
+    let firebaseUser: any = null;
+    const auth = getFirebaseAuth();
+    
     try {
-      const auth = getFirebaseAuth();
 
       // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(
@@ -54,6 +56,7 @@ export default function AdminSignupPage() {
         data.email.trim(),
         data.password
       );
+      firebaseUser = userCredential.user;
 
       // Update user profile with name
       await updateProfile(userCredential.user, {
@@ -79,7 +82,53 @@ export default function AdminSignupPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || "Failed to create admin account");
+        const errorCode = errorData.code || errorData.errorCode;
+        const errorMsg = errorData.error || errorData.message || "Failed to create admin account";
+        
+        // Handle specific error codes
+        let userFriendlyError = errorMsg;
+        let shouldShowLoginLink = false;
+        let shouldCleanupUser = false;
+        
+        if (errorCode === "ORGANIZATION_EXISTS" || errorMsg.includes("already has an organization")) {
+          userFriendlyError = "This account already has an organization. Please login instead.";
+          shouldShowLoginLink = true;
+          shouldCleanupUser = true;
+        } else if (errorCode === "ORGANIZATION_CREATION_FAILED") {
+          if (errorMsg.includes("already exists") || errorMsg.includes("organization")) {
+            userFriendlyError = "An organization with this name or email already exists. Please use a different name or login instead.";
+            shouldShowLoginLink = true;
+            shouldCleanupUser = true;
+          } else {
+            userFriendlyError = "Failed to create organization. Please try again or contact support.";
+            shouldCleanupUser = true;
+          }
+        } else {
+          // For other errors, also cleanup if user was created
+          shouldCleanupUser = true;
+        }
+        
+        // If Firebase user was created but organization creation failed, try to delete the user
+        if (firebaseUser && shouldCleanupUser) {
+          try {
+            // Delete the user (this will also sign them out)
+            await deleteUser(firebaseUser);
+            console.log("Cleaned up Firebase user after failed organization creation");
+          } catch (deleteError: any) {
+            console.error("Failed to delete Firebase user:", deleteError);
+            // If deletion fails, try to sign out at least
+            try {
+              await auth.signOut();
+            } catch (signOutError) {
+              console.error("Failed to sign out:", signOutError);
+            }
+            // Note: User may need to manually delete their account or contact support
+          }
+        }
+        
+        const error = new Error(userFriendlyError) as any;
+        error.shouldShowLoginLink = shouldShowLoginLink;
+        throw error;
       }
 
       const result = await response.json();
@@ -113,20 +162,50 @@ export default function AdminSignupPage() {
       console.error("Admin signup error:", error);
 
       let errorMessage = "Failed to create admin account. Please try again.";
+      let shouldShowLoginLink = false;
+      
+      // Handle Firebase authentication errors
       if (error.code === "auth/email-already-in-use") {
         errorMessage = "An account with this email already exists. Please login instead.";
+        shouldShowLoginLink = true;
       } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address format";
+        errorMessage = "Invalid email address format. Please check your email and try again.";
       } else if (error.code === "auth/weak-password") {
-        errorMessage = "Password is too weak. Please use a stronger password.";
+        errorMessage = "Password is too weak. Please use a stronger password (minimum 6 characters).";
+      } else if (error.code === "auth/operation-not-allowed") {
+        errorMessage = "Email/password accounts are not enabled. Please contact support.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage = "Network error. Please check your connection and try again.";
       } else if (error.message) {
         errorMessage = error.message;
+        // Check if error suggests login
+        if (error.shouldShowLoginLink || 
+            error.message.toLowerCase().includes("login") || 
+            error.message.toLowerCase().includes("already exists") ||
+            error.message.toLowerCase().includes("already has")) {
+          shouldShowLoginLink = true;
+        }
       }
 
+      // Show error toast with login link if applicable
       toast({
         title: "Signup failed",
-        description: errorMessage,
+        description: shouldShowLoginLink ? (
+          <div className="space-y-2">
+            <p className="text-sm">{errorMessage}</p>
+            <Link 
+              href="/admin/login" 
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white underline hover:no-underline transition-all mt-2"
+            >
+              Go to Login
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        ) : (
+          <p className="text-sm">{errorMessage}</p>
+        ),
         variant: "destructive",
+        duration: shouldShowLoginLink ? 8000 : 5000, // Show longer if login link is present
       });
     } finally {
       setIsLoading(false);

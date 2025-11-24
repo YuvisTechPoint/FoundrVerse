@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Award, Download, CheckCircle, Lock, Eye } from "lucide-react";
+import { Award, Download, CheckCircle, Lock, Eye, Share2, Shield, Copy, CheckCircle2, Trophy, Star, Badge } from "lucide-react";
 import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CertificateSectionProps {
   userName: string;
@@ -14,6 +15,59 @@ interface CertificateSectionProps {
 
 export default function CertificateSection({ userName, userEmail, hasPurchased, isCourseCompleted }: CertificateSectionProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [certificateId, setCertificateId] = useState<string>("");
+  const { toast } = useToast();
+
+  // Generate certificate ID
+  const generateCertificateId = () => {
+    if (!certificateId) {
+      const id = `${userEmail.split('@')[0].toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      setCertificateId(id);
+      return id;
+    }
+    return certificateId;
+  };
+
+  // Copy certificate verification link
+  const handleCopyVerificationLink = () => {
+    const id = generateCertificateId();
+    const verificationLink = `${window.location.origin}/verify-certificate/${id}`;
+    navigator.clipboard.writeText(verificationLink);
+    toast({
+      title: "Verification link copied!",
+      description: "Share this link to verify your certificate",
+    });
+  };
+
+  // Share certificate
+  const handleShareCertificate = async () => {
+    if (!isCourseCompleted) {
+      toast({
+        title: "Certificate not available",
+        description: "Complete the course to share your certificate",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const id = generateCertificateId();
+    const verificationLink = `${window.location.origin}/verify-certificate/${id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My Startup Certificate - FoundrVerse",
+          text: `I've completed the 30-Day Startup Blueprint course! Verify my certificate: ${verificationLink}`,
+          url: verificationLink,
+        });
+      } catch (error) {
+        // User cancelled or error occurred
+        handleCopyVerificationLink();
+      }
+    } else {
+      handleCopyVerificationLink();
+    }
+  };
 
   const handleDownloadCertificate = async () => {
     if (!hasPurchased) {
@@ -66,7 +120,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
   };
 
   const generateCertificateHTML = (name: string, email: string): string => {
-    const certificateId = `${email.split('@')[0].toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+    const id = generateCertificateId();
     const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     
     return `
@@ -292,7 +346,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
       </div>
       
       <div class="certificate-id">
-        Certificate ID: ${certificateId}
+        Certificate ID: ${id}
       </div>
     </div>
   </div>
@@ -302,7 +356,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
   };
 
   return (
-    <div className="bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/20 dark:from-gray-900 dark:via-amber-950/20 dark:to-yellow-950/10 border border-amber-200/60 dark:border-amber-800/60 rounded-2xl shadow-xl p-8 mb-8">
+    <div className="bg-gradient-to-br from-white via-amber-50/40 to-yellow-50/30 dark:from-gray-900 dark:via-amber-950/20 dark:to-yellow-950/10 border-2 border-amber-200 dark:border-amber-800/60 rounded-2xl shadow-lg dark:shadow-xl p-8 mb-8 hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-300">
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl shadow-lg">
@@ -315,10 +369,81 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
         </div>
       </div>
 
+      {/* Certificate Features */}
+      {hasPurchased && isCourseCompleted && (
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          {/* Verification Feature */}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -2 }}
+            className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-2 border-blue-200 dark:border-blue-800/50 rounded-xl"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm">Verification</h3>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Verify your certificate authenticity</p>
+            <button
+              onClick={handleCopyVerificationLink}
+              className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Copy Link
+            </button>
+          </motion.div>
+
+          {/* Share Feature */}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -2 }}
+            className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-2 border-purple-200 dark:border-purple-800/50 rounded-xl"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                <Share2 className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm">Share</h3>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Share your achievement</p>
+            <button
+              onClick={handleShareCertificate}
+              className="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Share Now
+            </button>
+          </motion.div>
+
+          {/* Achievements Feature */}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -2 }}
+            className="p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-2 border-amber-200 dark:border-amber-800/50 rounded-xl"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
+                <Trophy className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm">Achievements</h3>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">View your course achievements</p>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Badge className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">Course Completed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">Certificate Earned</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {hasPurchased ? (
         <div className="space-y-4">
           {isCourseCompleted ? (
-            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl">
+            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-300 dark:border-green-800 rounded-xl shadow-sm">
               <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-green-900 dark:text-green-100">Course Completed</p>
@@ -326,7 +451,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+            <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 rounded-xl shadow-sm">
               <Lock className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-amber-900 dark:text-amber-100">Complete Course to Unlock Certificate</p>
@@ -337,9 +462,9 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
 
           {/* Certificate Preview */}
           <div className="relative max-w-2xl mx-auto">
-            <div className={`relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 ${
+            <div className={`relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 shadow-lg ${
               isCourseCompleted 
-                ? "border-amber-300 dark:border-amber-700" 
+                ? "border-amber-400 dark:border-amber-700 shadow-amber-500/20" 
                 : "border-gray-300 dark:border-gray-700"
             }`}>
               {/* Blurred Certificate Preview */}
@@ -458,10 +583,47 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
           <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             Your certificate will include your name, completion date, and a unique certificate ID
           </p>
+
+          {/* Certificate Achievements Badge */}
+          {isCourseCompleted && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mt-6 p-6 bg-gradient-to-br from-amber-100 via-yellow-100 to-amber-50 dark:from-amber-950/40 dark:via-yellow-950/40 dark:to-amber-950/40 border-2 border-amber-300 dark:border-amber-800/60 rounded-2xl"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl shadow-lg">
+                  <Trophy className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1">Certificate Achievements</h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    You've unlocked all certificate features and achievements!
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { icon: CheckCircle2, label: "Course Completed", color: "text-green-600 dark:text-green-400" },
+                      { icon: Award, label: "Certificate Earned", color: "text-amber-600 dark:text-amber-400" },
+                      { icon: Shield, label: "Verification Ready", color: "text-blue-600 dark:text-blue-400" },
+                      { icon: Share2, label: "Shareable", color: "text-purple-600 dark:text-purple-400" },
+                    ].map((achievement, idx) => {
+                      const Icon = achievement.icon;
+                      return (
+                        <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                          <Icon className={`w-4 h-4 ${achievement.color}`} />
+                          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{achievement.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 rounded-xl shadow-sm">
             <Lock className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <div>
               <p className="font-semibold text-amber-900 dark:text-amber-100">Certificate Available After Purchase</p>
@@ -473,7 +635,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
 
           {/* Certificate Preview - Locked (Not Purchased) */}
           <div className="relative max-w-2xl mx-auto">
-            <div className="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-700">
+            <div className="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-700 shadow-lg">
               {/* Blurred Certificate Preview */}
               <div className="relative blur-md">
                 <div className="aspect-[11.69/8.27] bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-4 sm:p-6">

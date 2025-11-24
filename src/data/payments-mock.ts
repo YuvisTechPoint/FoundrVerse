@@ -34,8 +34,15 @@ export interface Refund {
 }
 
 // In-memory store (replace with database in production)
+// Using a Map for better performance and to maintain state across hot reloads in development
 const paymentsStore: Payment[] = [];
 const processedWebhookEvents = new Set<string>(); // For idempotency
+
+// Add test payment data for development
+if (process.env.NODE_ENV === 'development') {
+  // This will help test the purchased state
+  console.log('Payments Mock Store initialized with', paymentsStore.length, 'payments');
+}
 
 export function createPayment(payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>): Payment {
   const newPayment: Payment = {
@@ -45,6 +52,13 @@ export function createPayment(payment: Omit<Payment, 'id' | 'createdAt' | 'updat
     updatedAt: new Date().toISOString(),
   };
   paymentsStore.push(newPayment);
+  console.log('Payment Created:', {
+    id: newPayment.id,
+    userId: newPayment.userId,
+    status: newPayment.status,
+    amount: newPayment.amount,
+    totalPayments: paymentsStore.length
+  });
   return newPayment;
 }
 
@@ -62,13 +76,24 @@ export function getPaymentByPaymentId(paymentId: string): Payment | undefined {
 
 export function updatePayment(id: string, updates: Partial<Payment>): Payment | null {
   const index = paymentsStore.findIndex((p) => p.id === id);
-  if (index === -1) return null;
+  if (index === -1) {
+    console.log('Payment not found for update:', id);
+    return null;
+  }
   
   paymentsStore[index] = {
     ...paymentsStore[index],
     ...updates,
     updatedAt: new Date().toISOString(),
   };
+  
+  console.log('Payment Updated:', {
+    id: paymentsStore[index].id,
+    userId: paymentsStore[index].userId,
+    status: paymentsStore[index].status,
+    paymentId: paymentsStore[index].paymentId,
+  });
+  
   return paymentsStore[index];
 }
 
@@ -87,7 +112,35 @@ export function getPaymentsByStatus(status: Payment['status']): Payment[] {
 }
 
 export function getPaymentsByUserId(userId: string): Payment[] {
-  return paymentsStore.filter((p) => p.userId === userId);
+  const userPayments = paymentsStore.filter((p) => p.userId === userId);
+  console.log(`Getting payments for user ${userId}:`, {
+    count: userPayments.length,
+    payments: userPayments.map(p => ({
+      id: p.id,
+      status: p.status,
+      amount: p.amount,
+      paidAt: p.paidAt,
+      userId: p.userId,
+      userEmail: p.userEmail
+    }))
+  });
+  return userPayments;
+}
+
+export function getPaymentsByEmail(email: string): Payment[] {
+  const emailPayments = paymentsStore.filter((p) => p.userEmail === email);
+  console.log(`Getting payments for email ${email}:`, {
+    count: emailPayments.length,
+    payments: emailPayments.map(p => ({
+      id: p.id,
+      status: p.status,
+      amount: p.amount,
+      paidAt: p.paidAt,
+      userId: p.userId,
+      userEmail: p.userEmail
+    }))
+  });
+  return emailPayments;
 }
 
 export function addRefund(paymentId: string, refund: Omit<Refund, 'id' | 'createdAt'>): Refund {

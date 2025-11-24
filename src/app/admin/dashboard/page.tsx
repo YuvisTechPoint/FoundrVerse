@@ -17,11 +17,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAdmin !== true) return;
 
-    // Refresh data every 30 seconds
+    // Refresh data every 5 seconds for realtime updates
     const interval = setInterval(() => {
       // Trigger re-render by updating a state if needed
       window.dispatchEvent(new Event("refresh-data"));
-    }, 30000);
+    }, 5000); // 5 seconds for realtime feel
 
     return () => clearInterval(interval);
   }, [isAdmin]);

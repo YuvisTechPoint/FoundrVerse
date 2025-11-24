@@ -33,8 +33,8 @@ export default function OverviewCards() {
 
     fetchData();
 
-    // Real-time updates every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    // Real-time updates every 5 seconds
+    const interval = setInterval(fetchData, 5000);
     
     // Listen for manual refresh events
     window.addEventListener("refresh-data", fetchData);

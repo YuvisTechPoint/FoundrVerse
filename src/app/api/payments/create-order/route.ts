@@ -1,12 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createOrder, ensureRazorpayKeys } from '@/lib/razorpay';
 import { createPayment } from '@/data/payments-mock';
 import { generateReceiptId } from '@/lib/razorpay-utils';
+import { verifySessionCookie } from '@/lib/verifySession';
+
+const SESSION_COOKIE_NAME = "session";
+const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication first
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
+    const sessionSignature = cookieStore.get(SESSION_SIGNATURE_COOKIE_NAME)?.value ?? null;
+
+    const decoded = await verifySessionCookie(sessionCookie, sessionSignature);
+
+    if (!decoded) {
+      return NextResponse.json(
+        { error: 'Authentication required', message: 'Please login to continue' },
+        { status: 401 }
+      );
+    }
+
+    // Use authenticated user's ID from session (not client-provided)
+    const authenticatedUserId = decoded.uid;
+    const authenticatedUserEmail = decoded.email;
+
     const body = await request.json();
-    const { userId, enrollmentId, amount, currency = 'INR', metadata = {} } = body;
+    const { userId: clientUserId, enrollmentId, amount, currency = 'INR', metadata = {} } = body;
+    
+    // Use authenticated userId (prioritize session over client-provided)
+    const userId = authenticatedUserId || clientUserId;
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -43,18 +69,27 @@ export async function POST(request: NextRequest) {
       amount,
       currency: order.currency,
       status: 'created',
-      userId,
+      userId: authenticatedUserId, // CRITICAL: Always use authenticated userId from session
+      userEmail: authenticatedUserEmail || metadata?.userEmail || metadata?.email, // Use authenticated email
       courseId: enrollmentId,
       receiptId,
-      metadata,
+      metadata: {
+        ...metadata,
+        authenticatedUserId, // Store authenticated ID in metadata
+        clientUserId, // Store client-provided ID for reference
+        createdAt: new Date().toISOString(),
+      },
     });
 
-    console.log('Payment order created:', {
+    console.log('Payment order created with authenticated user:', {
       paymentId: payment.id,
       orderId: payment.orderId,
       amount: payment.amount,
       userId: payment.userId,
+      userEmail: payment.userEmail,
+      authenticatedUserId,
       status: payment.status,
+      note: 'Payment linked to authenticated user account',
     });
 
     return NextResponse.json({

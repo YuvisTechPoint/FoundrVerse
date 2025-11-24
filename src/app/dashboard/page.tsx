@@ -2,19 +2,28 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle, BookOpen, Users, Award, LogOut, Code, Briefcase, Users2, Megaphone, Calendar, Clock, ShoppingCart, XCircle, CheckCircle2 } from "lucide-react";
+import { Suspense } from "react";
+import { CheckCircle, BookOpen, Users, Award, LogOut, Code, Briefcase, Users2, Megaphone, Calendar, Clock, ShoppingCart, XCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { verifySessionCookie } from "@/lib/verifySession";
 import { getMockUser } from "@/data/users-mock";
-import { getPaymentsByUserId } from "@/data/payments-mock";
+import { getPaymentsByUserId, getAllPayments, getPaymentsByEmail } from "@/data/payments-mock";
 import { getCourseProgress } from "@/data/course-progress-mock";
-import SessionsSection from "@/components/dashboard/SessionsSection";
+import LiveCoursesSection from "@/components/dashboard/LiveCoursesSection";
+import RecordedCoursesSection from "@/components/dashboard/RecordedCoursesSection";
 import CertificateSection from "@/components/dashboard/CertificateSection";
 import CourseProgress from "@/components/dashboard/CourseProgress";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
 import CourseFeatureCard from "@/components/dashboard/CourseFeatureCard";
+import CourseFeaturesDetail from "@/components/dashboard/CourseFeaturesDetail";
+import PitchCompetitionSection from "@/components/dashboard/PitchCompetitionSection";
+import PurchaseHandler from "@/components/dashboard/PurchaseHandler";
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
+
+// Force dynamic rendering to always get fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -39,11 +48,40 @@ export default async function DashboardPage() {
   };
 
   // Check if user has purchased the course
-  const userPayments = getPaymentsByUserId(decoded.uid);
-  const hasPurchased = userPayments.some(
+  // Use authenticated userId directly (same as used in payment creation/verification)
+  const authenticatedUserId = decoded.uid;
+  const userPayments = getPaymentsByUserId(authenticatedUserId);
+  
+  let hasPurchased = userPayments.some(
     (payment) => payment.status === "paid" || payment.status === "captured" || payment.status === "authorized"
   );
-  const latestPayment = userPayments
+  
+  // Fallback: If no payments found by userId, try by email (for backward compatibility)
+  let finalUserPayments = userPayments;
+  if (!hasPurchased && user.email) {
+    const emailPayments = getPaymentsByEmail(user.email);
+    const paidEmailPayments = emailPayments.filter(
+      (p) => p.status === "paid" || p.status === "captured" || p.status === "authorized"
+    );
+    if (paidEmailPayments.length > 0) {
+      finalUserPayments = paidEmailPayments;
+      hasPurchased = true;
+    }
+  }
+  
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Dashboard] Purchase Status Check:', {
+      authenticatedUserId,
+      userEmail: user.email,
+      totalPayments: userPayments.length,
+      paidPayments: userPayments.filter(p => p.status === "paid" || p.status === "captured" || p.status === "authorized").length,
+      hasPurchased,
+      allPaymentStatuses: userPayments.map(p => ({ id: p.id, status: p.status, userId: p.userId }))
+    });
+  }
+  
+  const latestPayment = finalUserPayments
     .filter((p) => p.status === "paid" || p.status === "captured" || p.status === "authorized")
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
 
@@ -52,139 +90,197 @@ export default async function DashboardPage() {
   const isCourseCompleted = courseProgress.progress >= 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800 pt-28 pb-8">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/20 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden">
+      {/* Handle purchase redirect */}
+      <Suspense fallback={null}>
+        <PurchaseHandler />
+      </Suspense>
+      
+      {/* Premium background effects - Enhanced for light mode */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.04),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.12),transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.03),transparent_50%)] dark:bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(255,255,255,0.5)_100%)] dark:bg-transparent pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-6 pt-32 pb-12 relative z-10">
         {/* Dashboard Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="mb-10">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent mb-3">
             Dashboard
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Welcome back, {user.displayName || "Student"}
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            Welcome back, <span className="font-semibold text-gray-900 dark:text-white">{user.displayName || "Student"}</span>
           </p>
         </div>
 
-        {/* Account Information Card */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-6 mb-8">
+        {/* Purchase Confirmation Banner */}
+        {hasPurchased && latestPayment && (
+          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-2 border-green-200 dark:border-green-800/50 rounded-2xl shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                <CheckCircle2 className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-green-900 dark:text-green-100 mb-1">
+                  Course Purchase Confirmed! 🎉
+                </h3>
+                <p className="text-green-700 dark:text-green-300 mb-2">
+                  You have successfully enrolled in the <strong>30-Day Startup Blueprint</strong> course. All premium features are now unlocked!
+                </p>
+                {latestPayment.paidAt && (
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Purchased on {new Date(latestPayment.paidAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Account Information Card - Premium */}
+        <div className="relative group mb-8">
+          {/* Glow effect - Subtle in light mode */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-slate-400 via-slate-500 to-slate-600 dark:from-slate-500 dark:via-slate-600 dark:to-slate-700 rounded-2xl blur-lg opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500" />
+          
+          {/* Card - Enhanced contrast for light mode */}
+          <div className="relative bg-white dark:bg-gray-900/80 backdrop-blur-xl border-2 border-gray-200 dark:border-gray-700/50 rounded-2xl shadow-lg dark:shadow-xl p-8 hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-300">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               {user.photoURL ? (
-                <div className="relative w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0">
+                <div className="relative w-20 h-20 rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0 shadow-lg">
                   <Image
                     src={user.photoURL}
                     alt={user.displayName ?? "User avatar"}
                     fill
                     className="object-cover"
-                    sizes="64px"
+                    sizes="80px"
                   />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl font-semibold text-white flex-shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center text-3xl font-bold text-white flex-shrink-0 shadow-xl">
                   {(user.displayName ?? "U").charAt(0).toUpperCase()}
                 </div>
               )}
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{user.displayName}</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{user.displayName}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{user.email}</p>
               </div>
             </div>
             <form action="/api/auth/logout" method="post">
               <button
                 type="submit"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
+                className="group flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-300 text-sm font-semibold shadow-sm hover:shadow-md"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                 Sign Out
               </button>
             </form>
           </div>
 
           {/* Course Enrollment Status */}
-          <div className="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6">
+          <div className="border-t-2 border-gray-200 dark:border-gray-700/50 mt-8 pt-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {hasPurchased ? (
                   <>
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/30">
+                      <CheckCircle2 className="w-7 h-7 text-white" strokeWidth={2.5} />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Course Enrolled</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {latestPayment?.paidAt
-                          ? `Enrolled on ${new Date(latestPayment.paidAt).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })}`
-                          : "Full course access granted"}
+                      <p className="font-bold text-lg text-gray-900 dark:text-white mb-1">Course Access Active</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                        You have full access to all course materials
                       </p>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30">
-                      <ShoppingCart className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-orange-400 to-amber-600 shadow-lg shadow-orange-500/30">
+                      <ShoppingCart className="w-7 h-7 text-white" strokeWidth={2.5} />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Enrollment Required</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="font-bold text-lg text-gray-900 dark:text-white mb-1">Enrollment Required</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                         Complete enrollment to access course materials
                       </p>
                     </div>
                   </>
                 )}
               </div>
-              {!hasPurchased && (
+              {hasPurchased ? (
+                <Link
+                  href="/course"
+                  className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 text-sm shadow-lg hover:shadow-xl hover:scale-105"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  <span>View Course</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              ) : (
                 <Link
                   href="/payment"
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm shadow-sm"
+                  className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 text-sm shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  Enroll Now
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Enroll Now</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               )}
             </div>
+          </div>
           </div>
         </div>
 
         {/* Course Progress Section */}
         {hasPurchased && (
-          <CourseProgress
-            progress={courseProgress.progress}
-            modules={courseProgress.modules}
-            totalModules={courseProgress.totalModules}
-            completedModules={courseProgress.completedModules}
-          />
+          <div id="course-progress">
+            <CourseProgress
+              progress={courseProgress.progress}
+              modules={courseProgress.modules}
+              totalModules={courseProgress.totalModules}
+              completedModules={courseProgress.completedModules}
+            />
+          </div>
         )}
 
-        {/* Course Overview */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">30-Day Startup Blueprint</h2>
-                {hasPurchased ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Enrolled
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-semibold">
-                    <XCircle className="w-3.5 h-3.5" />
-                    Not Enrolled
-                  </span>
-                )}
+        {/* Course Overview - Premium */}
+        <div className="relative group mb-8">
+          {/* Glow effect - Subtle in light mode */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-slate-400 via-slate-500 to-slate-600 dark:from-slate-500 dark:via-slate-600 dark:to-slate-700 rounded-3xl blur-lg opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500" />
+          
+          {/* Card - Enhanced contrast for light mode */}
+          <div className="relative bg-white dark:bg-gray-900/80 backdrop-blur-xl border-2 border-gray-200 dark:border-gray-700/50 rounded-3xl shadow-xl dark:shadow-2xl p-8 md:p-10 hover:shadow-2xl dark:hover:shadow-2xl transition-shadow duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
+                    30-Day Startup Blueprint
+                  </h2>
+                  {hasPurchased ? (
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold shadow-lg shadow-green-500/30">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Enrolled
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 text-white text-xs font-bold shadow-lg shadow-orange-500/30">
+                      <XCircle className="w-3.5 h-3.5" />
+                      Not Enrolled
+                    </span>
+                  )}
+                </div>
+                <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">Comprehensive startup development program</p>
               </div>
-              <p className="text-gray-600 dark:text-gray-300">Comprehensive startup development program</p>
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <Calendar className="w-4 h-4" />
+                <span>4 Weeks</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <Calendar className="w-4 h-4" />
-              <span>4 Weeks</span>
-            </div>
-          </div>
 
-          {/* Course Weeks */}
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            {/* Course Weeks */}
+            <div className="grid md:grid-cols-2 gap-4 mb-8" data-section="course-weeks">
             {[
               { week: "Week 1", topic: "Idea, Research, Validation" },
               { week: "Week 2", topic: "Product, MVP, No-Code Build" },
@@ -193,32 +289,62 @@ export default async function DashboardPage() {
             ].map((item, index) => (
               <div
                 key={item.week}
-                className="flex items-start gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                className="group relative flex items-start gap-5 p-6 rounded-2xl border-2 border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/30 backdrop-blur-sm hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 hover:shadow-lg dark:hover:shadow-xl hover:-translate-y-1"
               >
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
+                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 dark:from-slate-600 dark:via-slate-700 dark:to-slate-800 text-white flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300 border border-slate-600/30 dark:border-slate-500/30">
                   {index + 1}
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <div className="flex-1 pt-1">
+                  <p className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">
                     {item.week}
                   </p>
-                  <p className="text-base font-semibold text-gray-900 dark:text-white">{item.topic}</p>
+                  <p className="text-base font-bold text-gray-900 dark:text-white leading-snug">{item.topic}</p>
                 </div>
               </div>
             ))}
-          </div>
+            </div>
 
-          {/* Course Features */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Course Features</h3>
-            <div className="grid md:grid-cols-3 gap-3">
+            {/* Course Features */}
+            <div className="border-t-2 border-gray-200 dark:border-gray-700/50 pt-8 mt-8">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Course Features</h3>
+              <div className="grid md:grid-cols-3 gap-4">
               {[
-                { iconName: "BookOpen", title: "30-Day Course", desc: "Complete startup blueprint", variant: "luxury" as const },
-                { iconName: "Code", title: "Practical Tasks", desc: "Hands-on execution", variant: "diamond" as const },
-                { iconName: "Briefcase", title: "Internship", desc: "Top students get internships", variant: "platinum" as const },
-                { iconName: "Users2", title: "Live Sessions", desc: "Direct founder mentorship", variant: "luxury" as const },
-                { iconName: "Megaphone", title: "Pitch Competition", desc: "Pitch to investors", variant: "diamond" as const },
-                { iconName: "Award", title: "Certificate", desc: "Industry-grade certification", variant: "luxury" as const },
+                { 
+                  iconName: "BookOpen", 
+                  title: "30-Day Course", 
+                  desc: "Comprehensive 4-week startup blueprint covering idea validation, MVP development, marketing, and funding strategies", 
+                  variant: "luxury" as const 
+                },
+                { 
+                  iconName: "Code", 
+                  title: "Practical Tasks", 
+                  desc: "Hands-on assignments and real-world projects to build your startup from scratch with actionable execution", 
+                  variant: "diamond" as const 
+                },
+                { 
+                  iconName: "Briefcase", 
+                  title: "Internship", 
+                  desc: "Exclusive internship opportunities across 4 active startups for top-performing students", 
+                  variant: "platinum" as const 
+                },
+                { 
+                  iconName: "Users2", 
+                  title: "Live Sessions", 
+                  desc: "Interactive live sessions with founders and industry experts for direct mentorship and Q&A", 
+                  variant: "luxury" as const 
+                },
+                { 
+                  iconName: "Megaphone", 
+                  title: "Pitch Competition", 
+                  desc: "Final pitch competition where you present your startup to real investors and get feedback", 
+                  variant: "diamond" as const 
+                },
+                { 
+                  iconName: "Award", 
+                  title: "Certificate", 
+                  desc: "Industry-recognized certificate of completion with verification and sharing capabilities", 
+                  variant: "luxury" as const 
+                },
               ].map(({ iconName, title, desc, variant }) => (
                 <CourseFeatureCard
                   key={title}
@@ -228,20 +354,48 @@ export default async function DashboardPage() {
                   variant={variant}
                 />
               ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Certificate Section */}
-        <CertificateSection 
-          userName={user.displayName ?? "Student"}
-          userEmail={user.email ?? ""}
-          hasPurchased={hasPurchased}
-          isCourseCompleted={isCourseCompleted}
-        />
+        {/* Detailed Course Features Section */}
+        {hasPurchased && (
+          <CourseFeaturesDetail />
+        )}
 
-        {/* Live & Recorded Sessions */}
-        <SessionsSection />
+        {/* Live Courses Section - Premium */}
+        {hasPurchased && (
+          <div id="sessions">
+            <LiveCoursesSection />
+          </div>
+        )}
+
+        {/* Recorded Courses Section - Premium */}
+        {hasPurchased && (
+          <div id="recorded-sessions">
+            <RecordedCoursesSection />
+          </div>
+        )}
+
+        {/* Pitch Competition Section */}
+        {hasPurchased && (
+          <div id="pitch">
+            <PitchCompetitionSection />
+          </div>
+        )}
+
+        {/* Certificate Section - Premium - Always show after purchase with locked template */}
+        {hasPurchased && (
+          <div id="certificate">
+            <CertificateSection 
+              userName={user.displayName ?? "Student"}
+              userEmail={user.email ?? ""}
+              hasPurchased={hasPurchased}
+              isCourseCompleted={isCourseCompleted}
+            />
+          </div>
+        )}
 
         {/* Quick Actions */}
         {hasPurchased && (
@@ -267,48 +421,57 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Community & Collaboration Section */}
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          {/* Office Meeting Image */}
-          <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-2xl">
-            <Image
-              src="/images/istockphoto-1077565558-612x612.jpg"
-              alt="Team Collaboration"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-6">
-              <div>
-                <h3 className="text-2xl font-bold text-white mb-2">Join Our Community</h3>
-                <p className="text-white/90 text-sm">Collaborate with fellow founders and build together</p>
+        {/* Community & Collaboration Section - Premium */}
+        {hasPurchased && (
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            {/* Office Meeting Image */}
+            <div className="relative group h-64 md:h-80 rounded-3xl overflow-hidden shadow-2xl">
+              <Image
+                src="/images/istockphoto-1077565558-612x612.jpg"
+                alt="Team Collaboration"
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end p-8">
+                <div>
+                  <h3 className="text-3xl font-bold text-white mb-3">Join Our Community</h3>
+                  <p className="text-white/90 text-base font-medium">Collaborate with fellow founders and build together</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Steps - Premium */}
+            <div className="relative group">
+              {/* Glow effect - Subtle in light mode */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-slate-400 via-slate-500 to-slate-600 dark:from-slate-500 dark:via-slate-600 dark:to-slate-700 rounded-3xl blur-lg opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500" />
+              
+              {/* Card - Enhanced contrast for light mode */}
+              <div className="relative bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-slate-950/40 dark:via-gray-950/40 dark:to-slate-950/40 backdrop-blur-xl border-2 border-slate-200 dark:border-slate-800/50 rounded-3xl p-8 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-300">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recommended Actions</h3>
+                <ul className="space-y-4">
+                  {[
+                    "Review course curriculum and structure",
+                    "Access learning materials and resources",
+                    "Participate in community discussions",
+                    "Begin working on practical assignments",
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start gap-4 group/item">
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-md group-hover/item:scale-110 transition-transform">
+                          <CheckCircle className="h-4 w-4 text-white" strokeWidth={3} />
+                        </div>
+                      </div>
+                      <span className="text-base text-gray-700 dark:text-gray-300 font-medium leading-relaxed group-hover/item:text-gray-900 dark:group-hover/item:text-white transition-colors">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
-
-          {/* Next Steps */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recommended Actions</h3>
-            <ul className="space-y-3 text-gray-700 dark:text-gray-300">
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Review course curriculum and structure</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Access learning materials and resources</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Participate in community discussions</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Begin working on practical assignments</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

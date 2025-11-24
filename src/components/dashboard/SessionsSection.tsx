@@ -84,7 +84,7 @@ export default function SessionsSection() {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 border border-gray-200/80 dark:border-gray-800/80 rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/50 p-10 mb-8 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 border-2 border-gray-200 dark:border-gray-800/80 rounded-3xl shadow-xl dark:shadow-2xl dark:shadow-black/50 p-10 mb-8 backdrop-blur-sm hover:shadow-2xl dark:hover:shadow-2xl transition-shadow duration-300">
         <div className="flex items-center justify-between mb-10">
           <div className="space-y-2">
             <div className="flex items-center gap-3">

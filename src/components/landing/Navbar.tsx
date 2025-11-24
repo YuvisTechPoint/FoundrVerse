@@ -59,10 +59,10 @@ export default function Navbar() {
   };
 
   return (
-    <header className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90%] sm:w-[85%] md:w-[80%] max-w-4xl transition-all duration-500 rounded-full mx-auto border ${
+    <header className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90%] sm:w-[85%] md:w-[80%] max-w-4xl transition-all duration-500 rounded-full mx-auto border-2 ${
       scrolled 
-        ? 'glass-strong shadow-premium-lg border-white/40 dark:border-gray-700/30' 
-        : 'glass border-white/30 dark:border-gray-700/20 shadow-premium'
+        ? 'glass-strong shadow-premium-lg border-gray-300 dark:border-gray-700/50 shadow-xl' 
+        : 'glass border-gray-200 dark:border-gray-700/30 shadow-lg'
     }`}>
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="flex h-20 items-center justify-between">

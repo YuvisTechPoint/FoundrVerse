@@ -1,6 +1,7 @@
 "use client";
 
-import { BookOpen, Users, Award, Code, Briefcase, Users2, Megaphone, LucideIcon } from "lucide-react";
+import { BookOpen, Users, Award, Code, Briefcase, Users2, Megaphone, LucideIcon, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { PremiumIcon } from "@/components/ui/premium-icon";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -11,6 +12,30 @@ const iconMap: Record<string, LucideIcon> = {
   Briefcase,
   Users2,
   Megaphone,
+};
+
+const variantStyles = {
+  luxury: {
+    gradient: "from-amber-500/10 via-amber-400/5 to-transparent",
+    border: "border-2 border-amber-200 dark:border-amber-800/50",
+    hoverBorder: "group-hover:border-amber-300 dark:group-hover:border-amber-700/70",
+    glow: "shadow-md shadow-amber-500/10 dark:shadow-amber-500/10 group-hover:shadow-lg group-hover:shadow-amber-500/20 dark:group-hover:shadow-amber-500/30",
+    bg: "bg-white dark:bg-gray-900/80",
+  },
+  diamond: {
+    gradient: "from-indigo-500/10 via-indigo-400/5 to-transparent",
+    border: "border-2 border-indigo-200 dark:border-indigo-800/50",
+    hoverBorder: "group-hover:border-indigo-300 dark:group-hover:border-indigo-700/70",
+    glow: "shadow-md shadow-indigo-500/10 dark:shadow-indigo-500/10 group-hover:shadow-lg group-hover:shadow-indigo-500/20 dark:group-hover:shadow-indigo-500/30",
+    bg: "bg-white dark:bg-gray-900/80",
+  },
+  platinum: {
+    gradient: "from-slate-500/10 via-slate-400/5 to-transparent",
+    border: "border-2 border-slate-200 dark:border-slate-800/50",
+    hoverBorder: "group-hover:border-slate-300 dark:group-hover:border-slate-700/70",
+    glow: "shadow-md shadow-slate-500/10 dark:shadow-slate-500/10 group-hover:shadow-lg group-hover:shadow-slate-500/20 dark:group-hover:shadow-slate-500/30",
+    bg: "bg-white dark:bg-gray-900/80",
+  },
 };
 
 interface QuickActionCardProps {
@@ -27,24 +52,53 @@ export default function QuickActionCard({
   variant = "luxury" 
 }: QuickActionCardProps) {
   const Icon = iconMap[iconName] || BookOpen;
+  const styles = variantStyles[variant];
   
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      <div className="relative mb-4">
-        <PremiumIcon 
-          icon={Icon} 
-          size={28} 
-          variant={variant}
-          className="!p-3"
-          animated={true}
-        />
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      className={`group relative ${styles.bg} backdrop-blur-xl ${styles.border} ${styles.hoverBorder} rounded-3xl p-8 transition-all duration-500 ${styles.glow} overflow-hidden cursor-pointer`}
+    >
+      {/* Animated gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+      
+      {/* Shine effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="mb-6"
+        >
+          <PremiumIcon 
+            icon={Icon} 
+            size={32} 
+            variant={variant}
+            className="!p-4"
+            animated={true}
+          />
+        </motion.div>
+        
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
+          {title}
+        </h3>
+        <p className="text-gray-700 dark:text-gray-400 text-sm leading-relaxed mb-4 group-hover:text-gray-800 dark:group-hover:text-gray-300 transition-colors">
+          {description}
+        </p>
+        
+        {/* Arrow indicator */}
+        <div className="flex items-center gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-300 transition-colors">
+          <span>Explore</span>
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </div>
       </div>
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">{title}</h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm">
-        {description}
-      </p>
-    </div>
+    </motion.div>
   );
 }
 

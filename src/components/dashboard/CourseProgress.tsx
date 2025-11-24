@@ -23,7 +23,7 @@ export default function CourseProgress({ progress, modules, totalModules, comple
   const isCompleted = progress >= 100;
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+    <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-lg dark:shadow-xl p-8 mb-8 hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-300">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <PremiumIcon 
@@ -68,7 +68,7 @@ export default function CourseProgress({ progress, modules, totalModules, comple
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
           </motion.div>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-sm text-gray-700 dark:text-gray-400 mt-2 font-medium">
           {completedModules} of {totalModules} modules completed
         </p>
       </div>
@@ -84,8 +84,8 @@ export default function CourseProgress({ progress, modules, totalModules, comple
             transition={{ delay: index * 0.1 }}
             className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
               module.completed
-                ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
-                : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+                ? "bg-green-50 dark:bg-green-950/20 border-green-300 dark:border-green-800 shadow-sm"
+                : "bg-white dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
             }`}
           >
             <div className="flex-shrink-0">
@@ -104,12 +104,12 @@ export default function CourseProgress({ progress, modules, totalModules, comple
                 {module.type === "video" && <Video className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
                 {module.type === "reading" && <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
                 {module.type === "assignment" && <Award className="w-4 h-4 text-pink-600 dark:text-pink-400" />}
-                <h4 className={`font-semibold ${module.completed ? "text-green-900 dark:text-green-100" : "text-gray-900 dark:text-white"}`}>
+                <h4 className={`font-bold ${module.completed ? "text-green-900 dark:text-green-100" : "text-gray-900 dark:text-white"}`}>
                   {module.title}
                 </h4>
               </div>
               {module.duration && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">{module.duration}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{module.duration}</p>
               )}
             </div>
             {module.completed && (

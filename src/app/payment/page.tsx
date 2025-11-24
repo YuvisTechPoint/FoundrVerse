@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,17 +14,44 @@ const COURSE_PRICE = 1499;
 export default function PaymentPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  useEffect(() => {
+    // Get current user from session
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUserId(data.user.uid || "");
+          setUserEmail(data.user.email || "");
+          setUserName(data.user.displayName || data.user.name || "");
+        } else {
+          router.push("/login");
+        }
+      })
+      .catch(() => {
+        router.push("/login");
+      })
+      .finally(() => {
+        setIsLoadingUser(false);
+      });
+  }, [router]);
 
   const handlePaymentSuccess = (paymentId: string, orderId: string) => {
     toast({
       title: "Payment successful!",
-      description: "Your enrollment is now active. Redirecting...",
+      description: "Your enrollment is now active. Redirecting to dashboard...",
+      duration: 3000,
     });
     
-    // Redirect to welcome page after a short delay
+    // Wait to ensure payment is saved, then redirect with full page reload and cache bust
     setTimeout(() => {
-      router.push("/welcome");
-    }, 1500);
+      // Add timestamp to force fresh data load
+      window.location.href = `/dashboard?purchased=true&t=${Date.now()}`;
+    }, 2500);
   };
 
   const handlePaymentError = (error: string) => {
@@ -121,30 +148,48 @@ export default function PaymentPage() {
                 </p>
               </div>
 
-              <RazorpayCheckout
-                options={{
-                  amount: COURSE_PRICE,
-                  currency: "INR",
-                  name: "Mewayz - FoundrVerse",
-                  description: "30-Day Startup Blueprint - Course Enrollment",
-                  prefill: {
-                    email: "", // You can get this from user session/context
-                    contact: "",
-                    name: "",
-                  },
-                  notes: {
-                    course: "30-Day Startup Blueprint",
-                  },
-                  onSuccess: handlePaymentSuccess,
-                  onError: handlePaymentError,
-                  onClose: () => {
-                    // User closed the payment modal
-                  },
-                }}
-                className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-900 dark:border-white"
-              >
-                Pay {formatPrice(COURSE_PRICE)}
-              </RazorpayCheckout>
+              {isLoadingUser ? (
+                <button
+                  disabled
+                  className="w-full bg-gray-400 dark:bg-gray-600 text-white py-4 rounded-xl font-semibold text-lg cursor-not-allowed"
+                >
+                  Loading...
+                </button>
+              ) : !userId ? (
+                <Link
+                  href="/login"
+                  className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-gray-900 dark:border-white text-center block"
+                >
+                  Please Login to Continue
+                </Link>
+              ) : (
+                <RazorpayCheckout
+                  options={{
+                    amount: COURSE_PRICE,
+                    currency: "INR",
+                    name: "Mewayz - FoundrVerse",
+                    description: "30-Day Startup Blueprint - Course Enrollment",
+                    userId: userId,
+                    courseId: "30-day-startup-blueprint",
+                    prefill: {
+                      email: userEmail,
+                      contact: "",
+                      name: userName,
+                    },
+                    notes: {
+                      course: "30-Day Startup Blueprint",
+                    },
+                    onSuccess: handlePaymentSuccess,
+                    onError: handlePaymentError,
+                    onClose: () => {
+                      // User closed the payment modal
+                    },
+                  }}
+                  className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-900 dark:border-white"
+                >
+                  Pay {formatPrice(COURSE_PRICE)}
+                </RazorpayCheckout>
+              )}
 
               <p className="text-xs text-center text-gray-500 dark:text-gray-400">
                 Your payment is secure and encrypted. We use Razorpay for secure transactions.

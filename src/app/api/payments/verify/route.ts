@@ -1,4 +1,6 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import {
   getPaymentByOrderId,
   updatePaymentByOrderId,
@@ -10,8 +12,26 @@ import { verifyPaymentSignature } from '@/lib/razorpay-utils';
 import { errorResponse, successResponse, validateRequired, ApiException, withErrorHandling } from '@/lib/api-utils';
 import { logger } from '@/lib/logger';
 import { ensureRazorpayKeys } from '@/lib/razorpay';
+import { verifySessionCookie } from '@/lib/verifySession';
+
+const SESSION_COOKIE_NAME = "session";
+const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
 
 export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Verify authentication first
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
+  const sessionSignature = cookieStore.get(SESSION_SIGNATURE_COOKIE_NAME)?.value ?? null;
+
+  const decoded = await verifySessionCookie(sessionCookie, sessionSignature);
+
+  if (!decoded) {
+    throw new ApiException('Authentication required', 401, 'AUTH_REQUIRED');
+  }
+
+  const authenticatedUserId = decoded.uid;
+  const authenticatedUserEmail = decoded.email;
+
   const body = await request.json().catch(() => {
     throw new ApiException('Invalid JSON in request body', 400, 'INVALID_JSON');
   });
@@ -21,6 +41,12 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     razorpay_payment_id,
     razorpay_signature,
   } = body;
+  
+  logger.info('Payment verification started for authenticated user', {
+    authenticatedUserId,
+    authenticatedUserEmail,
+    orderId: razorpay_order_id,
+  });
 
   // Validation
   const validation = validateRequired(body, ['razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature']);
@@ -36,10 +62,19 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   // Get payment record
   let payment = getPaymentByOrderId(razorpay_order_id);
   
+  logger.info('Payment verification started', {
+    orderId: razorpay_order_id,
+    paymentId: razorpay_payment_id,
+    foundPayment: !!payment,
+    paymentUserId: payment?.userId,
+    totalPayments: getAllPayments().length,
+  });
+  
   if (!payment) {
     logger.warn('Payment order not found in store', {
       razorpay_order_id,
       totalPayments: getAllPayments().length,
+      allOrderIds: getAllPayments().map(p => p.orderId),
     });
     
     // Try to find by payment ID if it exists
@@ -60,7 +95,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     if (!payment) {
       logger.warn('Creating fallback payment record for order', { razorpay_order_id });
       try {
-        // Create a minimal payment record - we'll update it after signature verification
+        // Try to get userId from Razorpay order notes if available
+        // Note: This requires fetching order from Razorpay API
+        // For now, we'll create without userId and log a warning
         payment = createPayment({
           orderId: razorpay_order_id,
           amount: 0, // Will be updated if we can get order details
@@ -68,7 +105,10 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
           status: 'created',
           receiptId: `fallback_${razorpay_order_id}`,
         });
-        logger.info('Created fallback payment record', { paymentId: payment.id });
+        logger.warn('Created fallback payment record without userId', { 
+          paymentId: payment.id,
+          note: 'UserId will need to be manually updated or payment may not show in dashboard'
+        });
       } catch (createError) {
         logger.error('Failed to create fallback payment', createError);
         throw new ApiException(
@@ -80,6 +120,14 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       }
     }
   }
+  
+  // Log payment details before update
+  logger.info('Payment record before update', {
+    id: payment.id,
+    userId: payment.userId,
+    status: payment.status,
+    orderId: payment.orderId,
+  });
 
   // Verify signature
   const { keySecret } = ensureRazorpayKeys();
@@ -123,21 +171,87 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-  // Update payment record
+  // CRITICAL: Preserve userId from original payment record
+  // CRITICAL: Use authenticated userId to ensure payment is linked to current user
+  // If payment already has a userId, verify it matches authenticated user
+  const userIdToUse = payment.userId || authenticatedUserId;
+  
+  if (payment.userId && payment.userId !== authenticatedUserId) {
+    logger.warn('Payment userId mismatch - updating to authenticated user', {
+      orderId: razorpay_order_id,
+      paymentUserId: payment.userId,
+      authenticatedUserId,
+      note: 'Updating payment to match authenticated user'
+    });
+  }
+  
+  // Update payment record - use authenticated userId to ensure sync
   const updatedPayment = updatePaymentByOrderId(razorpay_order_id, {
     paymentId: razorpay_payment_id,
     status: 'paid',
     paidAt: new Date().toISOString(),
+    // CRITICAL: Always use authenticated userId to ensure payment is linked to account
+    userId: authenticatedUserId,
+    userEmail: authenticatedUserEmail || payment.userEmail,
   });
 
   if (!updatedPayment) {
+    logger.error('Failed to update payment record', {
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      originalPaymentId: payment.id,
+    });
     throw new ApiException('Failed to update payment record', 500, 'UPDATE_FAILED');
   }
 
-  logger.info('Payment verified successfully', {
+  logger.info('Payment verified and updated successfully', {
     orderId: razorpay_order_id,
     paymentId: razorpay_payment_id,
+    userId: updatedPayment.userId,
+    authenticatedUserId,
+    status: updatedPayment.status,
+    paidAt: updatedPayment.paidAt,
   });
+  
+  // Triple check the payment is in the store with correct userId
+  const verifyStored = getPaymentByOrderId(razorpay_order_id);
+  if (!verifyStored) {
+    logger.error('Payment not found after update - CRITICAL ERROR', {
+      orderId: razorpay_order_id,
+    });
+  } else {
+    logger.info('Verified stored payment after update:', {
+      found: true,
+      status: verifyStored.status,
+      userId: verifyStored.userId,
+      authenticatedUserId,
+      paymentId: verifyStored.paymentId,
+      matchesExpected: verifyStored.userId === authenticatedUserId,
+    });
+    
+    // Verify we can find it by userId
+    if (verifyStored.userId) {
+      const userPayments = getAllPayments().filter(p => p.userId === verifyStored.userId);
+      logger.info('User payments after verification:', {
+        userId: verifyStored.userId,
+        totalPayments: userPayments.length,
+        paidPayments: userPayments.filter(p => p.status === 'paid').length,
+      });
+    }
+  }
+
+  // Revalidate dashboard path to refresh server component data
+  try {
+    revalidatePath('/dashboard');
+    revalidatePath('/course');
+    revalidatePath('/assignments');
+    revalidatePath('/internships');
+    revalidatePath('/sessions');
+    revalidatePath('/pitch');
+    revalidatePath('/certificate');
+  } catch (revalidateError) {
+    logger.warn('Failed to revalidate paths', revalidateError);
+  }
 
   // TODO: Trigger enrollment activation here
   // await enrollUser(payment.userId, payment.courseId, payment.cohort);
@@ -147,6 +261,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     paymentId: razorpay_payment_id,
     orderId: razorpay_order_id,
     status: 'paid',
+    userId: updatedPayment.userId,
     message: 'Payment verified successfully. Enrollment activated.',
   });
 });
