@@ -143,6 +143,37 @@ export function getPaymentsByEmail(email: string): Payment[] {
   return emailPayments;
 }
 
+// Backfill email for payments that are missing it
+export function backfillPaymentEmail(paymentId: string, email: string): Payment | null {
+  const payment = getPaymentById(paymentId);
+  if (!payment) return null;
+  
+  if (!payment.userEmail && email) {
+    return updatePayment(paymentId, { userEmail: email });
+  }
+  
+  return payment;
+}
+
+// Backfill email for all payments by userId that are missing email
+export function backfillPaymentsEmailByUserId(userId: string, email: string): number {
+  const userPayments = getPaymentsByUserId(userId);
+  let updated = 0;
+  
+  for (const payment of userPayments) {
+    if (!payment.userEmail && email) {
+      updatePayment(payment.id, { userEmail: email });
+      updated++;
+    }
+  }
+  
+  if (updated > 0) {
+    console.log(`Backfilled email for ${updated} payments for user ${userId}`);
+  }
+  
+  return updated;
+}
+
 export function addRefund(paymentId: string, refund: Omit<Refund, 'id' | 'createdAt'>): Refund {
   const payment = getPaymentByPaymentId(paymentId);
   if (!payment) {

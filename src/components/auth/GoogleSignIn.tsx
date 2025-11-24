@@ -34,9 +34,13 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
       setError(null);
     } catch (err) {
       console.error("Failed to load Firebase auth", err);
-      let errorMessage = "Sign in disabled — contact admin.";
       
-      if (err instanceof Error) {
+      // In production, show user-friendly message; in development, show detailed error
+      const isProduction = process.env.NODE_ENV === 'production';
+      let errorMessage = "Google sign-in is currently unavailable. Please try again later or contact support.";
+      
+      if (!isProduction && err instanceof Error) {
+        // Detailed error for development
         if (err.message.includes("placeholder") || err.message.includes("Missing Firebase config")) {
           errorMessage = "Firebase not configured. Please set up your Firebase credentials in .env.local. See docs/FIREBASE_AUTH.md for instructions.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
@@ -44,6 +48,8 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
         } else {
           errorMessage = err.message;
         }
+      } else if (!isProduction) {
+        errorMessage = "Sign in disabled — contact admin.";
       }
       
       setError(errorMessage);
@@ -228,13 +234,13 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
           </>
         )}
       </button>
-      {!error && !auth && (
+      {!error && !auth && isInitializing && (
         <p className="mt-2 text-sm text-gray-500" aria-live="polite">
           Initializing Firebase securely…
         </p>
       )}
       {error && (
-        <p className="mt-2 text-sm text-red-600" aria-live="assertive">
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400" aria-live="assertive">
           {error}
         </p>
       )}

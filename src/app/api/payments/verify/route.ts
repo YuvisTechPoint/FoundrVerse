@@ -215,8 +215,25 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     });
   }
   
-  // Ensure we have email - prioritize authenticated email, fallback to payment email
-  const finalUserEmail = authenticatedUserEmail || payment.userEmail || '';
+  // CRITICAL: Get email from multiple sources
+  // Priority: authenticated email > payment email > try to get from Razorpay order notes
+  let finalUserEmail = authenticatedUserEmail || payment.userEmail || '';
+  
+  // If still no email, try to get from payment metadata or order notes
+  if (!finalUserEmail && payment.metadata) {
+    finalUserEmail = payment.metadata.userEmail || payment.metadata.email || payment.metadata.authenticatedUserEmail || '';
+  }
+  
+  // If still no email, log warning but continue (email lookup will use userId)
+  if (!finalUserEmail) {
+    logger.warn('Payment verification: No email found, using userId only', {
+      orderId: razorpay_order_id,
+      authenticatedUserId,
+      authenticatedUserEmail,
+      paymentUserEmail: payment.userEmail,
+      note: 'Payment will be found by userId, but email-based lookup may fail'
+    });
+  }
   
   // Update payment record - use authenticated userId and email to ensure sync
   const updatedPayment = updatePaymentByOrderId(razorpay_order_id, {
@@ -225,17 +242,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     paidAt: new Date().toISOString(),
     // CRITICAL: Always use authenticated userId to ensure payment is linked to account
     userId: authenticatedUserId,
-    // CRITICAL: Always save email for proper account linking
-    userEmail: finalUserEmail,
+    // CRITICAL: Always save email for proper account linking (use authenticated email if available)
+    userEmail: authenticatedUserEmail || finalUserEmail || payment.userEmail || '',
   });
-  
-  if (!finalUserEmail) {
-    logger.warn('Payment updated without email - may cause lookup issues', {
-      orderId: razorpay_order_id,
-      authenticatedUserId,
-      note: 'Email should be set during payment creation or verification'
-    });
-  }
 
   if (!updatedPayment) {
     logger.error('Failed to update payment record', {

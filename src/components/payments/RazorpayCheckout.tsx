@@ -90,6 +90,9 @@ const handlePayment = async () => {
     }
 
     // 2. Create order on server
+    // CRITICAL: Extract email from prefill or metadata
+    const userEmail = options.prefill?.email || options.metadata?.userEmail || options.metadata?.email || '';
+    
     const orderResponse = await fetch('/api/payments/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -98,11 +101,11 @@ const handlePayment = async () => {
         currency: options.currency || 'INR',
         userId: options.userId,
         enrollmentId: options.courseId,
-        userEmail: options.prefill?.email || options.metadata?.userEmail, // Pass email explicitly
+        userEmail: userEmail, // CRITICAL: Pass email explicitly in body
         metadata: {
           ...options.metadata,
-          userEmail: options.prefill?.email || options.metadata?.userEmail, // Ensure email in metadata
-          email: options.prefill?.email || options.metadata?.userEmail, // Also as email field
+          userEmail: userEmail, // Ensure email in metadata
+          email: userEmail, // Also as email field for compatibility
         },
       }),
     });

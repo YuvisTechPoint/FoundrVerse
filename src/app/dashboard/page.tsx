@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { CheckCircle, BookOpen, Users, Award, LogOut, Code, Briefcase, Users2, Megaphone, Calendar, Clock, ShoppingCart, XCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { verifySessionCookie } from "@/lib/verifySession";
 import { getMockUser } from "@/data/users-mock";
-import { getPaymentsByUserId, getAllPayments, getPaymentsByEmail, updatePayment } from "@/data/payments-mock";
+import { getPaymentsByUserId, getAllPayments, getPaymentsByEmail, updatePayment, backfillPaymentsEmailByUserId } from "@/data/payments-mock";
 import { getCourseProgress } from "@/data/course-progress-mock";
 import LiveCoursesSection from "@/components/dashboard/LiveCoursesSection";
 import RecordedCoursesSection from "@/components/dashboard/RecordedCoursesSection";
@@ -51,6 +51,11 @@ export default async function DashboardPage() {
   // Use authenticated userId directly (same as used in payment creation/verification)
   const authenticatedUserId = decoded.uid;
   const authenticatedUserEmail = decoded.email || user.email;
+  
+  // CRITICAL: Backfill email for existing payments that don't have it
+  if (authenticatedUserEmail) {
+    backfillPaymentsEmailByUserId(authenticatedUserId, authenticatedUserEmail);
+  }
   
   // First, try to find payments by userId
   let userPayments = getPaymentsByUserId(authenticatedUserId);

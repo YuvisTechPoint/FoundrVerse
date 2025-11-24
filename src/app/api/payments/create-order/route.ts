@@ -29,10 +29,22 @@ export async function POST(request: NextRequest) {
     const authenticatedUserEmail = decoded.email;
 
     const body = await request.json();
-    const { userId: clientUserId, enrollmentId, amount, currency = 'INR', metadata = {} } = body;
+    const { userId: clientUserId, enrollmentId, amount, currency = 'INR', metadata = {}, userEmail: bodyUserEmail } = body;
     
     // Use authenticated userId (prioritize session over client-provided)
     const userId = authenticatedUserId || clientUserId;
+
+    // CRITICAL: Get email from multiple sources - prioritize body, then metadata, then session
+    const paymentEmail = bodyUserEmail || metadata?.userEmail || metadata?.email || authenticatedUserEmail || '';
+    
+    if (!paymentEmail) {
+      console.warn('Payment creation: No email found', {
+        authenticatedUserEmail,
+        bodyUserEmail,
+        metadataEmail: metadata?.userEmail || metadata?.email,
+        note: 'Email should be provided in request body'
+      });
+    }
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -64,16 +76,13 @@ export async function POST(request: NextRequest) {
       notes: { userId, enrollmentId, ...metadata },
     });
 
-    // Ensure we have email - try multiple sources
-    const paymentEmail = authenticatedUserEmail || metadata?.userEmail || metadata?.email || body.userEmail || '';
-    
     const payment = createPayment({
       orderId: order.id,
       amount,
       currency: order.currency,
       status: 'created',
       userId: authenticatedUserId, // CRITICAL: Always use authenticated userId from session
-      userEmail: paymentEmail, // CRITICAL: Save email for lookup
+      userEmail: paymentEmail, // CRITICAL: Save email for lookup (from body/metadata/session)
       courseId: enrollmentId,
       receiptId,
       metadata: {
@@ -92,9 +101,11 @@ export async function POST(request: NextRequest) {
       userId: payment.userId,
       userEmail: payment.userEmail,
       authenticatedUserId,
-      authenticatedUserEmail: paymentEmail,
+      authenticatedUserEmail,
+      paymentEmail,
+      emailSource: bodyUserEmail ? 'body' : (metadata?.userEmail || metadata?.email ? 'metadata' : (authenticatedUserEmail ? 'session' : 'none')),
       status: payment.status,
-      note: 'Payment linked to authenticated user account with email',
+      note: paymentEmail ? 'Payment linked to authenticated user account with email' : 'WARNING: Payment created without email',
     });
 
     return NextResponse.json({
