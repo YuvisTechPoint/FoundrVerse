@@ -107,7 +107,11 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to create session");
+        const isProduction = process.env.NODE_ENV === 'production';
+        const errorMessage = isProduction 
+          ? "Login failed. Please try again later or contact support."
+          : (errorData.message || "Failed to create session");
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();

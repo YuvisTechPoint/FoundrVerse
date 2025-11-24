@@ -41,18 +41,17 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
       
       if (!isProduction && err instanceof Error) {
         // Detailed error for development
-        if (err.message.includes("placeholder") || err.message.includes("Missing Firebase config")) {
-          errorMessage = "Firebase not configured. Please set up your Firebase credentials in .env.local. See docs/FIREBASE_AUTH.md for instructions.";
+        if (err.message.includes("placeholder") || err.message.includes("Missing Firebase config") || err.message.includes("temporarily unavailable")) {
+          errorMessage = "Firebase not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
           errorMessage = "Firebase Auth configuration not found. Please enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";
         } else {
           errorMessage = err.message;
         }
-      } else if (!isProduction) {
-        errorMessage = "Sign in disabled — contact admin.";
       }
       
       setError(errorMessage);
+      // Don't set auth to null - keep it null so button is hidden
     }
     setIsInitializing(false);
   }, []);
@@ -161,12 +160,15 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
       await finalizeLogin(result.user);
     } catch (err) {
       console.error(err);
-      let errorMessage = "Google sign-in failed";
       
-      if (err instanceof Error) {
-        // Check for Firebase API key errors
+      // In production, show user-friendly message; in development, show detailed error
+      const isProduction = process.env.NODE_ENV === 'production';
+      let errorMessage = "Google sign-in failed. Please try again later or contact support.";
+      
+      if (!isProduction && err instanceof Error) {
+        // Detailed error for development
         if (err.message.includes("api-key-not-valid") || err.message.includes("API key not valid")) {
-          errorMessage = "Firebase API key is invalid. Please check your .env.local file and ensure you've added your real Firebase credentials. See docs/FIREBASE_AUTH.md for setup instructions.";
+          errorMessage = "Firebase API key is invalid. Please check your environment variables. See VERCEL_ENV_SETUP.md for Vercel deployment or docs/FIREBASE_AUTH.md for local setup.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
           errorMessage = "Firebase Auth not configured. Enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";
         } else if (err.message.includes("auth/")) {
@@ -212,35 +214,41 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
     </svg>
   );
 
+  // Hide button completely if Firebase is not configured (production-friendly)
+  const isProduction = process.env.NODE_ENV === 'production';
+  const shouldHideButton = !auth && !isInitializing && (isProduction || error?.includes("not configured") || error?.includes("temporarily unavailable"));
+
   return (
     <div className={className}>
-      <button
-        type="button"
-        onClick={handleSignIn}
-        disabled={isLoading || !auth}
-        className="flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl py-3 font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50 shadow-sm"
-      >
-        {isLoading ? (
-          <>
-            <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 border-t-gray-700 dark:border-t-gray-300 rounded-full animate-spin" />
-            <span>Connecting...</span>
-          </>
-        ) : !auth ? (
-          "Preparing secure sign-in..."
-        ) : (
-          <>
-            <GoogleIcon />
-            <span>Continue with Google</span>
-          </>
-        )}
-      </button>
-      {!error && !auth && isInitializing && (
+      {!shouldHideButton && (
+        <button
+          type="button"
+          onClick={handleSignIn}
+          disabled={isLoading || !auth}
+          className="flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl py-3 font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50 shadow-sm"
+        >
+          {isLoading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 border-t-gray-700 dark:border-t-gray-300 rounded-full animate-spin" />
+              <span>Connecting...</span>
+            </>
+          ) : !auth ? (
+            "Preparing secure sign-in..."
+          ) : (
+            <>
+              <GoogleIcon />
+              <span>Continue with Google</span>
+            </>
+          )}
+        </button>
+      )}
+      {!error && !auth && isInitializing && !shouldHideButton && (
         <p className="mt-2 text-sm text-gray-500" aria-live="polite">
           Initializing Firebase securely…
         </p>
       )}
       {error && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400" aria-live="assertive">
+        <p className={`mt-2 text-sm ${shouldHideButton ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`} aria-live="assertive">
           {error}
         </p>
       )}

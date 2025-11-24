@@ -61,14 +61,32 @@ function getFirebaseConfig(): FirebaseConfig {
     .map((key) => requiredEnv[key]);
 
   if (missing.length) {
-    const errorMessage = `Missing Firebase config. Set the following env vars: ${missing.join(", ")}\n\n` +
-      `To fix this:\n` +
-      `1. Create a Firebase project at https://console.firebase.google.com\n` +
-      `2. Enable Google Authentication in Firebase Console\n` +
-      `3. Copy your Firebase config from Project Settings → General → Your apps\n` +
-      `4. Add the values to your .env.local file\n` +
-      `5. See docs/FIREBASE_AUTH.md for detailed instructions\n\n` +
-      `Required variables:\n${missing.map(v => `  - ${v}`).join("\n")}`;
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    let errorMessage: string;
+    if (isProduction) {
+      // User-friendly message for production
+      errorMessage = `Authentication service is temporarily unavailable. Please contact support.`;
+    } else {
+      // Detailed message for development
+      errorMessage = `Missing Firebase config. Set the following env vars: ${missing.join(", ")}\n\n` +
+        `To fix this:\n` +
+        `1. Create a Firebase project at https://console.firebase.google.com\n` +
+        `2. Enable Google Authentication in Firebase Console\n` +
+        `3. Copy your Firebase config from Project Settings → General → Your apps\n` +
+        `4. Add the values to your .env.local file\n` +
+        `5. See docs/FIREBASE_AUTH.md for detailed instructions\n\n` +
+        `Required variables:\n${missing.map(v => `  - ${v}`).join("\n")}`;
+    }
+    
+    // Log detailed error for developers/debugging
+    if (isProduction) {
+      console.error('Firebase configuration error:', {
+        missing,
+        message: `Missing Firebase config. Set the following env vars: ${missing.join(", ")}`,
+      });
+    }
+    
     throw new Error(errorMessage);
   }
 
