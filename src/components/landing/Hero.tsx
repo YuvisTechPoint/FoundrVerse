@@ -9,10 +9,14 @@ import { PremiumIcon } from "@/components/ui/premium-icon";
 
 export default function Hero() {
   return (
-    <div className="relative min-h-screen bg-white dark:bg-gray-900 overflow-hidden transition-colors duration-300" id="hero">
-      {/* Premium gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/20 to-purple-50/30 dark:from-gray-900 dark:via-indigo-950/20 dark:to-purple-950/30 pointer-events-none transition-colors duration-300" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,33,88,0.08),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(16,33,88,0.15),transparent_50%)] pointer-events-none transition-colors duration-300" />
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/40 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 overflow-hidden transition-all duration-500" id="hero">
+      {/* Premium gradient background with enhanced light theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/40 dark:from-gray-900 dark:via-indigo-950/20 dark:to-purple-950/30 pointer-events-none transition-all duration-500" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.06),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(16,33,88,0.15),transparent_50%)] pointer-events-none transition-all duration-500" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.04),transparent_50%)] dark:bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.1),transparent_50%)] pointer-events-none transition-all duration-500" />
+      
+      {/* Subtle grid pattern for premium feel */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] pointer-events-none opacity-40" />
       
       <Navbar />
       
@@ -26,14 +30,20 @@ export default function Hero() {
             transition={{ duration: 0.6 }}
             className="space-y-8"
           >
-            {/* Gold Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#f6b336] to-[#f9c866] rounded-full shadow-lg">
-              <span className="text-sm font-semibold text-charcoal dark:text-charcoal">Founder-taught</span>
-              <span className="w-1 h-1 rounded-full bg-charcoal/40 dark:bg-charcoal/40" />
-              <span className="text-sm font-semibold text-charcoal dark:text-charcoal">30-Day Program</span>
-              <span className="w-1 h-1 rounded-full bg-charcoal/40 dark:bg-charcoal/40" />
-              <span className="text-sm font-semibold text-charcoal dark:text-charcoal">₹1499</span>
-            </div>
+            {/* Premium Gold Badge with glassmorphism */}
+            <motion.div 
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#f6b336] via-[#f9c866] to-[#fcd34d] rounded-full shadow-premium-lg border border-white/30 backdrop-blur-sm"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(246, 179, 54, 0.3)" }}
+            >
+              <span className="text-sm font-bold text-charcoal drop-shadow-sm">Founder-taught</span>
+              <span className="w-1 h-1 rounded-full bg-charcoal/50" />
+              <span className="text-sm font-bold text-charcoal drop-shadow-sm">30-Day Program</span>
+              <span className="w-1 h-1 rounded-full bg-charcoal/50" />
+              <span className="text-sm font-bold text-charcoal drop-shadow-sm">₹1499</span>
+            </motion.div>
 
             <div className="mb-4 flex items-center gap-4">
               <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
@@ -51,20 +61,20 @@ export default function Hero() {
                 <span className="text-sm md:text-base font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
               </div>
             </div>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-charcoal dark:text-white leading-[1.1] tracking-tight transition-colors duration-300">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-br from-charcoal via-charcoal to-indigo-900 dark:from-white dark:via-white dark:to-gray-200 bg-clip-text text-transparent leading-[1.1] tracking-tight transition-all duration-300">
               India's First Practical Startup School for Students.
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl transition-colors duration-300">
+            <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 leading-relaxed max-w-2xl transition-colors duration-300 font-medium">
               Learn how real founders build. Do it yourself. Get certified. Get internships. Pitch to investors.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link 
                   href="/signup"
-                  className="group inline-flex items-center gap-2 bg-gradient-to-r from-[#f6b336] to-[#f9c866] text-charcoal font-bold py-4 px-8 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-200"
+                  className="group inline-flex items-center gap-2 bg-gradient-to-r from-[#f6b336] via-[#f9c866] to-[#fcd34d] text-charcoal font-bold py-4 px-8 rounded-xl text-lg shadow-premium-xl hover:shadow-[0_25px_50px_-12px_rgba(246,179,54,0.4)] transition-all duration-300 border border-white/30 backdrop-blur-sm"
                 >
                   Enroll Now
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -72,7 +82,7 @@ export default function Hero() {
               </motion.div>
               <Link 
                 href="/login"
-                className="inline-flex items-center justify-center border-2 border-charcoal dark:border-gray-300 text-charcoal dark:text-gray-300 hover:bg-charcoal dark:hover:bg-gray-300 hover:text-white dark:hover:text-gray-900 font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-200"
+                className="inline-flex items-center justify-center border-2 border-charcoal/20 dark:border-gray-300/30 text-charcoal dark:text-gray-300 hover:bg-charcoal/5 dark:hover:bg-gray-300/10 hover:border-charcoal/40 dark:hover:border-gray-300/50 font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 glass backdrop-blur-sm"
               >
                 Login / Signup
               </Link>
@@ -148,8 +158,8 @@ export default function Hero() {
                 />
               </div>
 
-              {/* Star Rating */}
-              <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md border border-gray-200/50 dark:border-gray-700/50">
+              {/* Star Rating with premium glassmorphism */}
+              <div className="flex items-center gap-2 glass-strong rounded-full px-5 py-2.5 shadow-premium border border-white/40 dark:border-gray-700/30">
                 <div className="flex items-center gap-0.5">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <motion.div
@@ -306,7 +316,7 @@ export default function Hero() {
       </div>
 
       {/* Bottom Gradient Transition */}
-      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none transition-colors duration-300" />
+      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-slate-50 via-white/80 to-transparent dark:from-gray-900 dark:via-gray-900/80 pointer-events-none transition-all duration-500" />
     </div>
   );
 }

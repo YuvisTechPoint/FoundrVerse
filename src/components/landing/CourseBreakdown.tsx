@@ -13,7 +13,7 @@ const weeks = [
 
 export default function CourseBreakdown() {
   return (
-    <section className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 py-24 transition-colors duration-300" id="course">
+    <section className="bg-gradient-to-b from-indigo-50/30 via-white to-slate-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-24 transition-all duration-500" id="course">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">

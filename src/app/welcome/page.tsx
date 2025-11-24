@@ -8,8 +8,8 @@ export default function WelcomePage() {
   const whatsappGroupLink = "https://whatsapp.com/channel/0029VbB9L7CHQbS20TBFgC1R";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/30 to-indigo-50/40">
-      <div className="container mx-auto px-6 py-20 flex flex-col items-center justify-center text-center">
+    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/30 to-indigo-50/40 pt-28 pb-20">
+      <div className="container mx-auto px-6 flex flex-col items-center justify-center text-center">
         <div className="max-w-2xl">
           <div className="mb-10">
             <CheckCircle className="h-24 w-24 mx-auto text-green-500 mb-6" />

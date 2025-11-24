@@ -16,8 +16,8 @@ export default function Pricing() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-gray-900 py-24 transition-colors duration-300 scroll-mt-28" id="pricing">
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-50/30 via-transparent to-indigo-50/30 dark:from-purple-950/30 dark:to-indigo-950/30 pointer-events-none transition-colors duration-300" />
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-24 transition-all duration-500 scroll-mt-28" id="pricing">
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-50/40 via-transparent to-indigo-50/40 dark:from-purple-950/30 dark:to-indigo-950/30 pointer-events-none transition-all duration-500" />
       
       {/* Animated background elements */}
       <motion.div
@@ -79,7 +79,7 @@ export default function Pricing() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
           whileHover={{ scale: 1.02, y: -5 }}
-          className="mx-auto max-w-lg rounded-3xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-10 shadow-2xl transition-colors duration-300 relative overflow-hidden"
+          className="mx-auto max-w-lg rounded-3xl border border-gray-200/50 dark:border-gray-700/50 glass-strong p-10 shadow-premium-xl transition-all duration-500 relative overflow-hidden"
         >
           {/* Shimmer effect */}
           <motion.div

@@ -39,7 +39,7 @@ const items = [
 
 export default function WhatStudentsGet() {
   return (
-    <section className="bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 py-24 transition-colors duration-300" id="what">
+    <section className="bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-24 transition-all duration-500" id="what">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">
@@ -68,7 +68,7 @@ export default function WhatStudentsGet() {
                 scale: 1.02,
                 transition: { duration: 0.3 }
               }}
-              className="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm transition-all duration-300 hover:shadow-2xl hover:border-gold dark:hover:border-gold/50 relative overflow-hidden"
+              className="group rounded-2xl border border-gray-200/50 dark:border-gray-700/50 glass-strong p-8 shadow-premium transition-all duration-300 hover:shadow-premium-xl hover:border-gold/50 dark:hover:border-gold/50 relative overflow-hidden"
             >
               {/* Animated background gradient on hover */}
               <motion.div

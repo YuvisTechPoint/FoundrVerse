@@ -12,7 +12,7 @@ export default function InternshipPitch() {
   ];
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 transition-colors duration-300">
+    <div className="bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-all duration-500">
       {/* Internship Section */}
       <section className="py-24" id="internship">
         <div className="mx-auto max-w-7xl px-6 sm:px-8">

@@ -137,8 +137,21 @@ const handlePayment = async () => {
 
           if (!verifyResponse.ok) {
             let errorData: any = {};
+            let errorText = '';
+            
             try {
-              errorData = await verifyResponse.json();
+              // Try to get response as text first
+              errorText = await verifyResponse.text();
+              // Try to parse as JSON
+              try {
+                errorData = JSON.parse(errorText);
+              } catch (parseError) {
+                // If not JSON, use the text as error message
+                errorData = {
+                  error: errorText || `Payment verification failed (${verifyResponse.status})`,
+                  message: verifyResponse.statusText || 'Unknown error',
+                };
+              }
             } catch (e) {
               // If response is not JSON, use status text
               errorData = {
@@ -151,27 +164,51 @@ const handlePayment = async () => {
             console.error('Payment verification failed:', {
               status: verifyResponse.status,
               statusText: verifyResponse.statusText,
-              error: errorData,
+              errorData,
+              errorText,
             });
             
-            throw new Error(errorData.error || errorData.message || `Payment verification failed (${verifyResponse.status})`);
+            const errorMessage = errorData.error || errorData.message || errorData.data?.error || errorData.data?.message || `Payment verification failed (${verifyResponse.status})`;
+            throw new Error(errorMessage);
           }
 
           const verifyData = await verifyResponse.json();
           
-          if (!verifyData.verified) {
-            throw new Error(verifyData.error || verifyData.message || 'Payment verification failed');
+          // Check if verification was successful
+          // Response structure: { success: true, data: { verified: true, paymentId, orderId, ... } }
+          if (!verifyData.success) {
+            const errorMessage = verifyData.error || verifyData.message || 'Payment verification failed';
+            throw new Error(errorMessage);
           }
           
-          options.onSuccess?.(verifyData.paymentId, verifyData.orderId);
+          // Check if data exists and is verified
+          if (!verifyData.data || !verifyData.data.verified) {
+            const errorMessage = verifyData.data?.error || verifyData.data?.message || verifyData.error || verifyData.message || 'Payment verification failed';
+            throw new Error(errorMessage);
+          }
+          
+          // Success - call onSuccess callback with payment and order IDs
+          const paymentId = verifyData.data.paymentId;
+          const orderId = verifyData.data.orderId;
+          
+          if (!paymentId || !orderId) {
+            throw new Error('Payment verification succeeded but payment details are missing');
+          }
+          
+          options.onSuccess?.(paymentId, orderId);
         } catch (error: any) {
-          console.error('Payment verification error:', {
-            message: error.message,
-            stack: error.stack,
-          });
+          // Improved error logging
+          const errorDetails = {
+            message: error?.message || 'Unknown error',
+            name: error?.name || 'Error',
+            stack: error?.stack || 'No stack trace',
+            response: error?.response || 'No response',
+          };
+          
+          console.error('Payment verification error:', errorDetails);
           
           // Provide user-friendly error message
-          const userMessage = error.message || 'Payment verification failed. Please contact support if the payment was successful.';
+          const userMessage = error?.message || errorDetails.message || 'Payment verification failed. Please contact support if the payment was successful.';
           options.onError?.(userMessage);
         } finally {
           setIsLoading(false);

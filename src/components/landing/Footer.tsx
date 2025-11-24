@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { Phone, Mail } from "lucide-react";
 
 interface FooterProps {
   className?: string;
@@ -30,7 +31,7 @@ export default function Footer({ className = '' }: FooterProps) {
   return (
     <footer className={`border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-12 transition-colors duration-300 ${className}`}>
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -126,6 +127,60 @@ export default function Footer({ className = '' }: FooterProps) {
                   </Link>
                 </motion.div>
               ))}
+            </div>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <h4 className="text-sm font-semibold text-charcoal dark:text-white mb-4 transition-colors duration-300">Contact</h4>
+            <div className="space-y-3">
+              <motion.a
+                href="tel:+918597331075"
+                className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 hover:text-charcoal dark:hover:text-white transition-colors group"
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <motion.div
+                  className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg"
+                  whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Phone className="w-4 h-4 text-white" />
+                </motion.div>
+                <div className="flex flex-col">
+                  <span className="font-medium">Phone</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500">+91 85973 31075</span>
+                </div>
+              </motion.a>
+              
+              <motion.a
+                href="mailto:debanjansandhaki@mewayz.com"
+                className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 hover:text-charcoal dark:hover:text-white transition-colors group"
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <motion.div
+                  className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg"
+                  whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Mail className="w-4 h-4 text-white" />
+                </motion.div>
+                <div className="flex flex-col">
+                  <span className="font-medium">Email</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500 break-all">debanjansandhaki@mewayz.com</span>
+                </div>
+              </motion.a>
             </div>
           </motion.div>
         </div>

@@ -3,8 +3,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, BookOpen, Users, Award, LogOut, Code, Briefcase, Users2, Megaphone, Calendar, Clock, ShoppingCart, XCircle, CheckCircle2 } from "lucide-react";
-import { PremiumIcon } from "@/components/ui/premium-icon";
-
 import { verifySessionCookie } from "@/lib/verifySession";
 import { getMockUser } from "@/data/users-mock";
 import { getPaymentsByUserId } from "@/data/payments-mock";
@@ -12,6 +10,8 @@ import { getCourseProgress } from "@/data/course-progress-mock";
 import SessionsSection from "@/components/dashboard/SessionsSection";
 import CertificateSection from "@/components/dashboard/CertificateSection";
 import CourseProgress from "@/components/dashboard/CourseProgress";
+import QuickActionCard from "@/components/dashboard/QuickActionCard";
+import CourseFeatureCard from "@/components/dashboard/CourseFeatureCard";
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
@@ -52,111 +52,56 @@ export default async function DashboardPage() {
   const isCourseCompleted = courseProgress.progress >= 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800">
-      {/* Welcome Content */}
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        {/* Welcome Header with Image */}
-        <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
-          {/* Left: Welcome Text */}
-          <div className="text-center md:text-left">
-          {user.photoURL ? (
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="relative w-24 h-24 rounded-full border-4 border-green-500 dark:border-green-400 overflow-hidden shadow-lg">
-                <Image
-                  src={user.photoURL}
-                  alt={user.displayName ?? "User avatar"}
-                  fill
-                  className="object-cover"
-                  sizes="96px"
-                  priority
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
-              <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
-            </div>
-          )}
-          <div className="mb-4 flex items-center gap-4 justify-center">
-            <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
-              <Image
-                src="/images/mewayz.jpeg"
-                alt="Mewayz FoundrVerse Logo"
-                fill
-                className="object-contain rounded-lg"
-                sizes="(max-width: 768px) 64px, 80px"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Mewayz</span>
-              <span className="text-sm md:text-base font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
-            </div>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome, {user.displayName?.split(" ")[0] || "Founder"}! 👋
+    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-gray-800 pt-28 pb-8">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Dashboard
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
-            You're now part of India's first practical startup school for students.
+          <p className="text-gray-600 dark:text-gray-400">
+            Welcome back, {user.displayName || "Student"}
           </p>
-          </div>
-          
-          {/* Right: Businessman Image */}
-          <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-2xl">
-            <Image
-              src="/images/businessman-7504296_640.jpg"
-              alt="Entrepreneur Success"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-          </div>
         </div>
 
-        {/* User Card */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-8 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-6">
-            {user.photoURL ? (
-                <div className="relative w-20 h-20 rounded-full border-2 border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0">
+        {/* Account Information Card */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {user.photoURL ? (
+                <div className="relative w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0">
                   <Image
-                src={user.photoURL}
-                alt={user.displayName ?? "User avatar"}
+                    src={user.photoURL}
+                    alt={user.displayName ?? "User avatar"}
                     fill
                     className="object-cover"
-                    sizes="80px"
-                    priority
-              />
+                    sizes="64px"
+                  />
                 </div>
-            ) : (
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white flex-shrink-0">
-                {(user.displayName ?? "F").charAt(0).toUpperCase()}
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl font-semibold text-white flex-shrink-0">
+                  {(user.displayName ?? "U").charAt(0).toUpperCase()}
                 </div>
               )}
               <div>
-                <p className="text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
-                  Logged in as
-                </p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{user.displayName}</h2>
-                <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{user.displayName}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
               </div>
             </div>
             <form action="/api/auth/logout" method="post">
               <button
                 type="submit"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                Sign Out
               </button>
             </form>
           </div>
 
-          {/* Course Purchase Status */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <div className="flex items-center justify-between">
+          {/* Course Enrollment Status */}
+          <div className="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 {hasPurchased ? (
                   <>
@@ -164,15 +109,15 @@ export default async function DashboardPage() {
                       <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Course Purchased</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">Course Enrolled</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {latestPayment?.paidAt
-                          ? `Purchased on ${new Date(latestPayment.paidAt).toLocaleDateString("en-US", {
+                          ? `Enrolled on ${new Date(latestPayment.paidAt).toLocaleDateString("en-US", {
                               month: "long",
                               day: "numeric",
                               year: "numeric",
                             })}`
-                          : "You have access to the course"}
+                          : "Full course access granted"}
                       </p>
                     </div>
                   </>
@@ -182,9 +127,9 @@ export default async function DashboardPage() {
                       <ShoppingCart className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Course Not Purchased</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">Enrollment Required</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Complete payment to access the course
+                        Complete enrollment to access course materials
                       </p>
                     </div>
                   </>
@@ -193,9 +138,9 @@ export default async function DashboardPage() {
               {!hasPurchased && (
                 <Link
                   href="/payment"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition text-sm"
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm shadow-sm"
                 >
-                  Buy Course
+                  Enroll Now
                 </Link>
               )}
             </div>
@@ -212,25 +157,25 @@ export default async function DashboardPage() {
           />
         )}
 
-        {/* Course Summary */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
+        {/* Course Overview */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">30-Day Startup Blueprint</h2>
                 {hasPurchased ? (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Purchased
+                    Enrolled
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-semibold">
                     <XCircle className="w-3.5 h-3.5" />
-                    Not Purchased
+                    Not Enrolled
                   </span>
                 )}
               </div>
-              <p className="text-gray-600 dark:text-gray-300">From idea to investors in 30 days</p>
+              <p className="text-gray-600 dark:text-gray-300">Comprehensive startup development program</p>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <Calendar className="w-4 h-4" />
@@ -263,34 +208,25 @@ export default async function DashboardPage() {
             ))}
           </div>
 
-          {/* What You Get */}
+          {/* Course Features */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">What You'll Get</h3>
-            <div className="grid md:grid-cols-3 gap-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Course Features</h3>
+            <div className="grid md:grid-cols-3 gap-3">
               {[
-                { icon: BookOpen, title: "30-Day Course", desc: "Complete startup blueprint", variant: "luxury" as const },
-                { icon: Code, title: "Practical Tasks", desc: "Hands-on execution", variant: "diamond" as const },
-                { icon: Briefcase, title: "Internship", desc: "Top students get internships", variant: "platinum" as const },
-                { icon: Users2, title: "Live Sessions", desc: "Direct founder mentorship", variant: "luxury" as const },
-                { icon: Megaphone, title: "Pitch Competition", desc: "Pitch to investors", variant: "diamond" as const },
-                { icon: Award, title: "Certificate", desc: "Industry-grade certification", variant: "luxury" as const },
-              ].map(({ icon: Icon, title, desc, variant }) => (
-                <div
+                { iconName: "BookOpen", title: "30-Day Course", desc: "Complete startup blueprint", variant: "luxury" as const },
+                { iconName: "Code", title: "Practical Tasks", desc: "Hands-on execution", variant: "diamond" as const },
+                { iconName: "Briefcase", title: "Internship", desc: "Top students get internships", variant: "platinum" as const },
+                { iconName: "Users2", title: "Live Sessions", desc: "Direct founder mentorship", variant: "luxury" as const },
+                { iconName: "Megaphone", title: "Pitch Competition", desc: "Pitch to investors", variant: "diamond" as const },
+                { iconName: "Award", title: "Certificate", desc: "Industry-grade certification", variant: "luxury" as const },
+              ].map(({ iconName, title, desc, variant }) => (
+                <CourseFeatureCard
                   key={title}
-                  className="flex items-start gap-4 p-5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800/50 dark:to-gray-900/30 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group"
-                >
-                  <PremiumIcon 
-                    icon={Icon} 
-                    size={24} 
-                    variant={variant}
-                    className="!p-3 !w-12 !h-12"
-                    animated={true}
-                  />
-                  <div className="flex-1 pt-1">
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mb-1 group-hover:text-gold transition-colors duration-300">{title}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{desc}</p>
-                  </div>
-                </div>
+                  iconName={iconName}
+                  title={title}
+                  desc={desc}
+                  variant={variant}
+                />
               ))}
             </div>
           </div>
@@ -308,58 +244,28 @@ export default async function DashboardPage() {
         <SessionsSection />
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div className="relative mb-4">
-              <PremiumIcon 
-                icon={BookOpen} 
-                size={28} 
-                variant="luxury"
-                className="!p-3"
-                animated={true}
-              />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">Start Learning</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Access your courses and begin your startup journey
-            </p>
+        {hasPurchased && (
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <QuickActionCard 
+              iconName="BookOpen"
+              title="Continue Learning"
+              description="Access course materials and continue your progress"
+              variant="luxury"
+            />
+            <QuickActionCard 
+              iconName="Users"
+              title="Community Access"
+              description="Connect with fellow students and founders"
+              variant="diamond"
+            />
+            <QuickActionCard 
+              iconName="Award"
+              title="Earn Certificate"
+              description="Complete the program to receive certification"
+              variant="luxury"
+            />
           </div>
-
-          <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div className="relative mb-4">
-              <PremiumIcon 
-                icon={Users} 
-                size={28} 
-                variant="diamond"
-                className="!p-3"
-                animated={true}
-              />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">Join Community</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Connect with fellow founders and students
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-gold/30 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div className="relative mb-4">
-              <PremiumIcon 
-                icon={Award} 
-                size={28} 
-                variant="luxury"
-                className="!p-3"
-                animated={true}
-              />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-gold transition-colors duration-300">Get Certified</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Complete the program and earn your certificate
-            </p>
-          </div>
-        </div>
+        )}
 
         {/* Community & Collaboration Section */}
         <div className="grid md:grid-cols-2 gap-8 mb-8">
@@ -381,24 +287,24 @@ export default async function DashboardPage() {
           </div>
 
           {/* Next Steps */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">What's Next?</h3>
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recommended Actions</h3>
             <ul className="space-y-3 text-gray-700 dark:text-gray-300">
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Complete your profile setup</span>
+                <span>Review course curriculum and structure</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Explore the course curriculum</span>
+                <span>Access learning materials and resources</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Join the student community</span>
+                <span>Participate in community discussions</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Start building your first startup project</span>
+                <span>Begin working on practical assignments</span>
               </li>
             </ul>
           </div>

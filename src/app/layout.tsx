@@ -42,7 +42,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 flex flex-col">
+      <body className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-all duration-500 flex flex-col">
         <ConditionalLayout>
           {children}
         </ConditionalLayout>

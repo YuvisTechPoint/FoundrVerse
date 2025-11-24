@@ -6,9 +6,11 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LayoutDashboard } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -18,6 +20,22 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(data.authenticated || false);
+        }
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, [pathname]);
 
   const handlePricingClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // If we're already on the home page, scroll to pricing section
@@ -38,10 +56,10 @@ export default function Navbar() {
   };
 
   return (
-    <header className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[80%] max-w-4xl transition-all duration-300 rounded-full mx-auto border-2 border-gray-300 dark:border-gray-700 ${
+    <header className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90%] sm:w-[85%] md:w-[80%] max-w-4xl transition-all duration-500 rounded-full mx-auto border ${
       scrolled 
-        ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg' 
-        : 'bg-white/95 dark:bg-gray-900/95'
+        ? 'glass-strong shadow-premium-lg border-white/40 dark:border-gray-700/30' 
+        : 'glass border-white/30 dark:border-gray-700/20 shadow-premium'
     }`}>
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="flex h-20 items-center justify-between">
@@ -82,6 +100,26 @@ export default function Navbar() {
             </Link>
           </motion.div>
           <nav className="flex items-center gap-3">
+            {isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 }}
+              >
+                <Link 
+                  href="/dashboard" 
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: "100%" }}
+                  />
+                </Link>
+              </motion.div>
+            )}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -100,23 +138,25 @@ export default function Navbar() {
                 />
               </Link>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Link 
-                href="/login" 
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group"
+            {!isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
               >
-                Login / Signup
-                <motion.span
-                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: "100%" }}
-                />
-              </Link>
-            </motion.div>
+                <Link 
+                  href="/login" 
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors relative group"
+                >
+                  Login / Signup
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: "100%" }}
+                  />
+                </Link>
+              </motion.div>
+            )}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -133,7 +173,7 @@ export default function Navbar() {
             >
               <Link 
                 href="/signup" 
-                className="rounded-xl bg-gradient-to-r from-gold to-[#f9c866] text-charcoal px-6 py-2.5 text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200"
+                className="rounded-xl bg-gradient-to-r from-gold via-[#f9c866] to-[#fcd34d] text-charcoal px-6 py-2.5 text-sm font-bold shadow-premium hover:shadow-premium-lg transition-all duration-300 border border-white/30 backdrop-blur-sm"
               >
                 Get Started
               </Link>

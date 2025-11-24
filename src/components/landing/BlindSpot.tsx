@@ -16,7 +16,7 @@ const points = [
 
 export default function BlindSpot() {
   return (
-    <section className="bg-white dark:bg-gray-900 py-24 transition-colors duration-300" id="blindspot">
+    <section className="bg-gradient-to-b from-white via-slate-50/50 to-white dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-24 transition-all duration-500" id="blindspot">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
