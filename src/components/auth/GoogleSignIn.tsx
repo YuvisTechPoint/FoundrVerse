@@ -47,7 +47,7 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
             err.message.includes("placeholder") ||
             err.message.includes("temporarily unavailable")) {
           errorMessage = isProduction
-            ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See VERCEL_ENV_SETUP.md for setup instructions."
+            ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
             : "Firebase not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
           errorMessage = "Firebase Auth configuration not found. Please enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";

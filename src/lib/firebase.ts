@@ -66,7 +66,7 @@ function getFirebaseConfig(): FirebaseConfig {
     let errorMessage: string;
     if (isProduction) {
       // More helpful message for production - guide to Vercel setup
-      errorMessage = `Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See VERCEL_ENV_SETUP.md for setup instructions.`;
+      errorMessage = `Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. Visit /setup-help for step-by-step instructions.`;
     } else {
       // Detailed message for development
       errorMessage = `Missing Firebase config. Set the following env vars: ${missing.join(", ")}\n\n` +
