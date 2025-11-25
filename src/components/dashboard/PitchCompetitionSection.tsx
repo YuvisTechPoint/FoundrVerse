@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Megaphone, Calendar, Users, Award, TrendingUp, FileText, Upload, CheckCircle2, Clock,
   Target, Lightbulb, Rocket, Trophy, Star, Users2, MessageSquare, Video, 
@@ -107,6 +107,12 @@ export default function PitchCompetitionSection() {
   const { toast } = useToast();
   const [selectedPitch, setSelectedPitch] = useState<PitchInfo | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "criteria" | "timeline">("overview");
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering animations after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmitPitch = () => {
     toast({
@@ -123,9 +129,10 @@ export default function PitchCompetitionSection() {
     <div className="space-y-8">
       {/* Hero Section */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={mounted ? { opacity: 0, y: 20 } : false}
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-1"
+        suppressHydrationWarning
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"></div>
         <div className="relative bg-white dark:bg-gray-900 rounded-3xl p-10 md:p-12">
@@ -135,29 +142,42 @@ export default function PitchCompetitionSection() {
           
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-6">
-            <PremiumIcon 
+              <PremiumIcon 
                 icon={Trophy} 
                 size={32} 
-              variant="diamond"
+                variant="diamond"
                 className="!p-4"
-              animated={true}
-            />
+                animated={mounted}
+              />
               <div className="flex items-center gap-3">
-                <motion.span
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Premium Competition
-                </motion.span>
-                <motion.span
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="px-4 py-1.5 bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-sm font-bold rounded-full border-2 border-green-300 dark:border-green-700"
-                >
-                  Registrations Opening Soon
-                </motion.span>
+                {mounted ? (
+                  <motion.span
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Premium Competition
+                  </motion.span>
+                ) : (
+                  <span className="px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg">
+                    <Sparkles className="w-4 h-4" />
+                    Premium Competition
+                  </span>
+                )}
+                {mounted ? (
+                  <motion.span
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="px-4 py-1.5 bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-sm font-bold rounded-full border-2 border-green-300 dark:border-green-700"
+                  >
+                    Registrations Opening Soon
+                  </motion.span>
+                ) : (
+                  <span className="px-4 py-1.5 bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-sm font-bold rounded-full border-2 border-green-300 dark:border-green-700">
+                    Registrations Opening Soon
+                  </span>
+                )}
               </div>
             </div>
             
@@ -244,19 +264,20 @@ export default function PitchCompetitionSection() {
         {activeTab === "overview" && (
           <motion.div
             key="overview"
-            initial={{ opacity: 0, y: 20 }}
+            initial={mounted ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="space-y-8"
+            suppressHydrationWarning
           >
             {/* Benefits Grid */}
             <div className="grid md:grid-cols-2 gap-6">
               {benefits.map((benefit, index) => (
         <motion.div
                   key={benefit.title}
-          initial={{ opacity: 0, y: 20 }}
+          initial={mounted ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: mounted ? index * 0.1 : 0 }}
                   whileHover={{ scale: 1.03, y: -5 }}
                   className={`p-8 bg-gradient-to-br ${benefit.bgColor} border-2 ${benefit.borderColor} rounded-2xl hover:shadow-xl transition-all duration-300 group`}
                 >
@@ -287,12 +308,12 @@ export default function PitchCompetitionSection() {
             </div>
       </div>
 
-          {pitchCompetitions.map((pitch, index) => (
-            <motion.div
-              key={pitch.id}
-                  initial={{ opacity: 0 }}
+              {pitchCompetitions.map((pitch, index) => (
+                <motion.div
+                  key={pitch.id}
+                  initial={mounted ? { opacity: 0 } : false}
                   animate={{ opacity: 1 }}
-              transition={{ delay: index * 0.1 }}
+                  transition={{ delay: mounted ? index * 0.1 : 0 }}
                   className="space-y-6"
                 >
                   {/* Status Badge */}
@@ -418,9 +439,9 @@ export default function PitchCompetitionSection() {
                 ].map((item, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={mounted ? { opacity: 0, x: -20 } : false}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: mounted ? index * 0.05 : 0 }}
                     whileHover={{ scale: 1.02, x: 5 }}
                     className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
                   >
@@ -440,10 +461,11 @@ export default function PitchCompetitionSection() {
         {activeTab === "criteria" && (
           <motion.div
             key="criteria"
-            initial={{ opacity: 0, y: 20 }}
+            initial={mounted ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10"
+            suppressHydrationWarning
           >
             <div className="flex items-center gap-4 mb-8">
               <div className="p-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-lg">
@@ -461,9 +483,9 @@ export default function PitchCompetitionSection() {
               {judgingCriteria.map((criteria, index) => (
                 <motion.div
                   key={criteria.name}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={mounted ? { opacity: 0, x: -20 } : false}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: mounted ? index * 0.1 : 0 }}
                   whileHover={{ scale: 1.02 }}
                   className="group"
                 >
@@ -481,12 +503,19 @@ export default function PitchCompetitionSection() {
                         </span>
                       </div>
                       <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${criteria.weight}%` }}
-                          transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
-                          className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
-                        />
+                        {mounted ? (
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${criteria.weight}%` }}
+                            transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
+                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
+                          />
+                        ) : (
+                          <div 
+                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
+                            style={{ width: `${criteria.weight}%` }}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -514,10 +543,11 @@ export default function PitchCompetitionSection() {
         {activeTab === "timeline" && (
           <motion.div
             key="timeline"
-            initial={{ opacity: 0, y: 20 }}
+            initial={mounted ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10"
+            suppressHydrationWarning
           >
             <div className="flex items-center gap-4 mb-8">
               <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
@@ -540,20 +570,26 @@ export default function PitchCompetitionSection() {
                 {timeline.map((item, index) => (
                   <motion.div
                     key={item.phase}
-                    initial={{ opacity: 0, x: -50 }}
+                    initial={mounted ? { opacity: 0, x: -50 } : false}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.2 }}
+                    transition={{ delay: mounted ? index * 0.2 : 0 }}
                     className="relative flex items-start gap-6"
                   >
                     {/* Circle indicator */}
                     <div className="relative z-10">
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
-                        className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
-                      >
-                        <span className="text-2xl font-bold text-white">{index + 1}</span>
-                      </motion.div>
+                      {mounted ? (
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
+                          className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
+                        >
+                          <span className="text-2xl font-bold text-white">{index + 1}</span>
+                        </motion.div>
+                      ) : (
+                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                          <span className="text-2xl font-bold text-white">{index + 1}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}
@@ -579,9 +615,9 @@ export default function PitchCompetitionSection() {
         </div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={mounted ? { opacity: 0, y: 20 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: mounted ? 0.8 : 0 }}
               className="mt-10 p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-2 border-amber-200 dark:border-amber-800 rounded-2xl"
             >
               <div className="flex items-start gap-3">

@@ -4,7 +4,7 @@ import { verifySessionCookie } from "@/lib/verifySession";
 import { getPaymentsByUserId } from "@/data/payments-mock";
 import PitchCompetitionSection from "@/components/dashboard/PitchCompetitionSection";
 import Link from "next/link";
-import { ArrowLeft, Megaphone, ShoppingCart, ArrowRight, Lock } from "lucide-react";
+import { ArrowLeft, Megaphone, ShoppingCart, ArrowRight, Lock, CheckCircle2 } from "lucide-react";
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
