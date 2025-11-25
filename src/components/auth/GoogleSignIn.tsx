@@ -39,15 +39,23 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
       const isProduction = process.env.NODE_ENV === 'production';
       let errorMessage = "Google sign-in is currently unavailable. Please try again later or contact support.";
       
-      if (!isProduction && err instanceof Error) {
-        // Detailed error for development
-        if (err.message.includes("placeholder") || err.message.includes("Missing Firebase config") || err.message.includes("temporarily unavailable")) {
-          errorMessage = "Firebase not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup.";
+      if (err instanceof Error) {
+        // Check for configuration issues first
+        if (err.message.includes("Firebase configuration is missing") || 
+            err.message.includes("Missing Firebase config") || 
+            err.message.includes("Missing Firebase") ||
+            err.message.includes("placeholder") ||
+            err.message.includes("temporarily unavailable")) {
+          errorMessage = isProduction
+            ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See VERCEL_ENV_SETUP.md for setup instructions."
+            : "Firebase not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
           errorMessage = "Firebase Auth configuration not found. Please enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";
-        } else {
+        } else if (!isProduction) {
+          // Show full error in development
           errorMessage = err.message;
         }
+        // In production, if it's not a config issue, keep the generic message
       }
       
       setError(errorMessage);
