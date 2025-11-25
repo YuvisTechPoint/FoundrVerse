@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { User } from "firebase/auth";
 import {
   GoogleAuthProvider,
@@ -256,9 +257,19 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
         </p>
       )}
       {error && (
-        <p className={`mt-2 text-sm ${shouldHideButton ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`} aria-live="assertive">
-          {error}
-        </p>
+        <div className="mt-2 space-y-2">
+          <p className={`text-sm ${shouldHideButton ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`} aria-live="assertive">
+            {error}
+          </p>
+          {(error.includes("Firebase configuration is missing") || error.includes("Vercel Dashboard") || error.includes("setup-help")) && !shouldHideButton ? (
+            <Link
+              href="/setup-help"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline font-medium"
+            >
+              View Setup Instructions →
+            </Link>
+          ) : null}
+        </div>
       )}
     </div>
   );
