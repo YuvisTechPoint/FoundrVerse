@@ -37,35 +37,23 @@ const benefits = [
   {
     icon: DollarSign,
     title: "Real Funding",
-    description: "Get connected with angel investors and VCs ready to fund promising startups",
-    color: "from-green-500 to-emerald-600",
-    bgColor: "from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30",
-    borderColor: "border-green-200 dark:border-green-800/50"
+    description: "Connect directly with investors actively backing early-stage founders.",
   },
   {
     icon: Building2,
     title: "Incubation Spots",
-    description: "Top 3 teams get access to premium incubation programs worth ₹5 lakhs",
-    color: "from-blue-500 to-indigo-600",
-    bgColor: "from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30",
-    borderColor: "border-blue-200 dark:border-blue-800/50"
+    description: "Reserved desks, resources, and warm introductions to ecosystem partners.",
   },
   {
     icon: Users2,
     title: "Expert Mentorship",
-    description: "Get personalized feedback from successful founders and industry experts",
-    color: "from-purple-500 to-pink-600",
-    bgColor: "from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30",
-    borderColor: "border-purple-200 dark:border-purple-800/50"
+    description: "Small-group reviews with accomplished founders and operators.",
   },
   {
     icon: TrendingUpIcon,
-    title: "Media Exposure",
-    description: "Winners get featured on major startup platforms and media outlets",
-    color: "from-orange-500 to-red-600",
-    bgColor: "from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30",
-    borderColor: "border-orange-200 dark:border-orange-800/50"
-  }
+    title: "Visibility & Media",
+    description: "Spotlight across FoundrVerse channels and startup publications.",
+  },
 ];
 
 const judgingCriteria = [
@@ -131,14 +119,14 @@ export default function PitchCompetitionSection() {
       <motion.div
         initial={mounted ? { opacity: 0, y: 20 } : false}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-1"
+        className="relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 rounded-3xl p-1"
         suppressHydrationWarning
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10"></div>
         <div className="relative bg-white dark:bg-gray-900 rounded-3xl p-10 md:p-12">
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-pink-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gray-100/40 dark:bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gray-100/30 dark:bg-white/5 rounded-full blur-3xl"></div>
           
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-6">
@@ -154,13 +142,13 @@ export default function PitchCompetitionSection() {
                   <motion.span
                     animate={{ scale: [1, 1.05, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg"
+                    className="px-4 py-1.5 bg-gray-900 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg"
                   >
                     <Sparkles className="w-4 h-4" />
                     Premium Competition
                   </motion.span>
                 ) : (
-                  <span className="px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg">
+                  <span className="px-4 py-1.5 bg-gray-900 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-lg">
                     <Sparkles className="w-4 h-4" />
                     Premium Competition
                   </span>
@@ -169,22 +157,20 @@ export default function PitchCompetitionSection() {
                   <motion.span
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="px-4 py-1.5 bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-sm font-bold rounded-full border-2 border-green-300 dark:border-green-700"
+                    className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold rounded-full border border-gray-200 dark:border-gray-700"
                   >
                     Registrations Opening Soon
                   </motion.span>
                 ) : (
-                  <span className="px-4 py-1.5 bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-sm font-bold rounded-full border-2 border-green-300 dark:border-green-700">
+                  <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold rounded-full border border-gray-200 dark:border-gray-700">
                     Registrations Opening Soon
                   </span>
                 )}
               </div>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
-              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Pitch to Real Investors
-              </span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
+              Pitch to Real Investors
             </h2>
             
             <p className="text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-3xl leading-relaxed">
@@ -194,44 +180,23 @@ export default function PitchCompetitionSection() {
 
             {/* Key Highlights */}
             <div className="grid md:grid-cols-3 gap-6">
-              <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-2 border-green-200 dark:border-green-800/50 rounded-2xl"
-              >
-                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
-                  <DollarSign className="w-6 h-6 text-white" />
-        </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">₹50L+</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Funding Pool</p>
-      </div>
-              </motion.div>
-
-        <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-2 border-blue-200 dark:border-blue-800/50 rounded-2xl"
-        >
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-                  <Users2 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">15+</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Expert Judges</p>
-          </div>
-        </motion.div>
-
-        <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="flex items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-2 border-purple-200 dark:border-purple-800/50 rounded-2xl"
-              >
-                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
-                  <Trophy className="w-6 h-6 text-white" />
-            </div>
-            <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">Top 3</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Win Prizes</p>
-                </div>
-              </motion.div>
+              {[{ label: "₹50L+", sub: "Funding Pool", icon: DollarSign },
+                { label: "15+", sub: "Expert Judges", icon: Users2 },
+                { label: "Top 3", sub: "Win Prizes", icon: Trophy }].map((item) => (
+                <motion.div
+                  key={item.label}
+                  whileHover={{ scale: 1.03, y: -4 }}
+                  className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm"
+                >
+                  <div className="p-3 bg-gray-900 text-white rounded-xl shadow-lg">
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{item.label}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.sub}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
@@ -249,7 +214,7 @@ export default function PitchCompetitionSection() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
               activeTab === tab.id
-                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                ? "bg-gray-900 text-white shadow-lg"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
@@ -273,16 +238,16 @@ export default function PitchCompetitionSection() {
             {/* Benefits Grid */}
             <div className="grid md:grid-cols-2 gap-6">
               {benefits.map((benefit, index) => (
-        <motion.div
+                <motion.div
                   key={benefit.title}
-          initial={mounted ? { opacity: 0, y: 20 } : false}
-          animate={{ opacity: 1, y: 0 }}
+                  initial={mounted ? { opacity: 0, y: 20 } : false}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: mounted ? index * 0.1 : 0 }}
-                  whileHover={{ scale: 1.03, y: -5 }}
-                  className={`p-8 bg-gradient-to-br ${benefit.bgColor} border-2 ${benefit.borderColor} rounded-2xl hover:shadow-xl transition-all duration-300 group`}
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  className="p-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl hover:shadow-xl transition-all duration-300 group"
                 >
-                  <div className={`inline-flex p-4 bg-gradient-to-br ${benefit.color} rounded-2xl shadow-lg mb-4 group-hover:scale-110 transition-transform`}>
-                    <benefit.icon className="w-8 h-8 text-white" />
+                  <div className="inline-flex p-4 bg-gray-900 text-white rounded-2xl shadow-lg mb-4 group-hover:scale-110 transition-transform">
+                    <benefit.icon className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                     {benefit.title}
@@ -295,10 +260,10 @@ export default function PitchCompetitionSection() {
             </div>
 
             {/* Competition Details */}
-            <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 shadow-xl">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-10 shadow-xl">
               <div className="flex items-center gap-3 mb-8">
-                <div className="p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl">
-                  <Megaphone className="w-8 h-8 text-white" />
+                <div className="p-4 bg-gray-900 text-white rounded-2xl">
+                  <Megaphone className="w-8 h-8" />
             </div>
             <div>
                   <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -318,12 +283,12 @@ export default function PitchCompetitionSection() {
                 >
                   {/* Status Badge */}
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-lg font-bold shadow-lg flex items-center gap-2">
+                    <div className="px-6 py-3 bg-gray-900 text-white rounded-xl text-lg font-bold shadow-lg flex items-center gap-2">
                       <Clock className="w-5 h-5" />
                       {pitch.status === "upcoming" ? "Upcoming" : pitch.status === "open" ? "Open Now" : "Closed"}
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl">
-                      <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                      <Calendar className="w-5 h-5 text-gray-900 dark:text-gray-200" />
                       <span className="font-semibold text-gray-900 dark:text-white">{pitch.date}</span>
                     </div>
                   </div>
@@ -342,17 +307,17 @@ export default function PitchCompetitionSection() {
                   {pitch.prize && (
                     <motion.div
                       whileHover={{ scale: 1.02 }}
-                      className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-2 border-amber-300 dark:border-amber-700 rounded-2xl"
+                      className="p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-2xl"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="p-3 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl shadow-lg">
-                          <Trophy className="w-7 h-7 text-white" />
+                        <div className="p-3 bg-gray-900 text-white rounded-xl shadow-lg">
+                          <Trophy className="w-7 h-7" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-lg font-bold text-amber-900 dark:text-amber-100 mb-2">
+                          <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
                             Competition Prize
                           </p>
-                          <p className="text-xl font-extrabold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                          <p className="text-xl font-extrabold text-gray-900 dark:text-white">
                             {pitch.prize}
                           </p>
                         </div>
@@ -362,23 +327,23 @@ export default function PitchCompetitionSection() {
 
                   {/* Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border-2 border-indigo-200 dark:border-indigo-800 rounded-xl text-center">
-                      <Users className="w-6 h-6 text-indigo-600 dark:text-indigo-400 mx-auto mb-2" />
+                  <div className="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-center">
+                    <Users className="w-6 h-6 text-gray-900 dark:text-gray-100 mx-auto mb-2" />
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{pitch.participants}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Registered</p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-2 border-green-200 dark:border-green-800 rounded-xl text-center">
-                      <Video className="w-6 h-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                  <div className="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-center">
+                    <Video className="w-6 h-6 text-gray-900 dark:text-gray-100 mx-auto mb-2" />
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">5 min</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Pitch Time</p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-2 border-blue-200 dark:border-blue-800 rounded-xl text-center">
-                      <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                  <div className="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-center">
+                    <MessageSquare className="w-6 h-6 text-gray-900 dark:text-gray-100 mx-auto mb-2" />
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">10 min</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Q&A</p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-2 border-amber-200 dark:border-amber-800 rounded-xl text-center">
-                      <Users2 className="w-6 h-6 text-amber-600 dark:text-amber-400 mx-auto mb-2" />
+                  <div className="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-center">
+                    <Users2 className="w-6 h-6 text-gray-900 dark:text-gray-100 mx-auto.mb-2" />
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">15+</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Judges</p>
                   </div>
@@ -391,20 +356,20 @@ export default function PitchCompetitionSection() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleSubmitPitch}
-                        className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold shadow-xl shadow-indigo-500/30 transition-all duration-300 flex items-center justify-center gap-3 text-lg"
+                      className="flex-1 px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold shadow-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg"
                     >
-                        <Upload className="w-6 h-6" />
-                        Submit Your Pitch
-                        <ArrowRight className="w-5 h-5" />
+                      <Upload className="w-6 h-6" />
+                      Submit Your Pitch
+                      <ArrowRight className="w-5 h-5" />
                     </motion.button>
                   ) : (
                     <motion.button
-                        whileHover={{ scale: 1.02 }}
+                      whileHover={{ scale: 1.02 }}
                       disabled
-                        className="flex-1 px-8 py-4 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-800 text-gray-600 dark:text-gray-400 rounded-xl font-bold cursor-not-allowed flex items-center justify-center gap-3 text-lg"
+                      className="flex-1 px-8 py-4 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-xl font-bold cursor-not-allowed flex items-center justify-center gap-3 text-lg"
                     >
-                        <Clock className="w-6 h-6" />
-                        Registrations Opening Soon
+                      <Clock className="w-6 h-6" />
+                      Registrations Opening Soon
                     </motion.button>
                   )}
                   </div>
@@ -413,10 +378,10 @@ export default function PitchCompetitionSection() {
             </div>
 
             {/* What to Prepare */}
-            <div className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-10">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-10">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                  <FileText className="w-7 h-7 text-white" />
+                <div className="p-4 bg-gray-900 text-white rounded-2xl shadow-lg">
+                  <FileText className="w-7 h-7" />
                 </div>
                 <div>
                   <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -443,10 +408,10 @@ export default function PitchCompetitionSection() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: mounted ? index * 0.05 : 0 }}
                     whileHover={{ scale: 1.02, x: 5 }}
-                    className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
+                    className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 dark:hover:border-gray-600 transition-all"
                   >
-                    <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
-                      <item.icon className="w-5 h-5 text-white" />
+                    <div className="p-2 bg-gray-900 text-white rounded-lg">
+                      <item.icon className="w-5 h-5" />
                     </div>
                     <span className="text-gray-800 dark:text-gray-200 font-medium flex-1">
                       {item.text}
@@ -468,8 +433,8 @@ export default function PitchCompetitionSection() {
             suppressHydrationWarning
           >
             <div className="flex items-center gap-4 mb-8">
-              <div className="p-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-lg">
-                <Star className="w-8 h-8 text-white" />
+                <div className="p-4 bg-gray-900 text-white rounded-2xl shadow-lg">
+                  <Star className="w-8 h-8" />
               </div>
               <div>
                 <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -490,15 +455,15 @@ export default function PitchCompetitionSection() {
                   className="group"
                 >
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                      <criteria.icon className="w-6 h-6 text-white" />
+                    <div className="p-3 bg-gray-900 text-white rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                      <criteria.icon className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-xl font-bold text-gray-900 dark:text-white">
                           {criteria.name}
                         </h4>
-                        <span className="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        <span className="text-2xl font-extrabold text-gray-900 dark:text-white">
                           {criteria.weight}%
                         </span>
                       </div>
@@ -508,11 +473,11 @@ export default function PitchCompetitionSection() {
                             initial={{ width: 0 }}
                             animate={{ width: `${criteria.weight}%` }}
                             transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
-                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
+                            className="h-full bg-gray-900 rounded-full"
                           />
                         ) : (
                           <div 
-                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
+                            className="h-full bg-gray-900 rounded-full"
                             style={{ width: `${criteria.weight}%` }}
                           />
                         )}
@@ -523,14 +488,14 @@ export default function PitchCompetitionSection() {
               ))}
             </div>
 
-            <div className="mt-10 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-2 border-blue-200 dark:border-blue-800 rounded-2xl">
+            <div className="mt-10 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-2xl">
               <div className="flex items-start gap-3">
-                <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" />
+                <Shield className="w-6 h-6 text-gray-900 dark:text-gray-100 flex-shrink-0 mt-1" />
                 <div>
-                  <p className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Fair & Transparent Evaluation
                   </p>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     All pitches are evaluated by multiple judges independently. Scores are aggregated
                     to ensure fairness and eliminate bias.
                   </p>
@@ -550,8 +515,8 @@ export default function PitchCompetitionSection() {
             suppressHydrationWarning
           >
             <div className="flex items-center gap-4 mb-8">
-              <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
-                <Calendar className="w-8 h-8 text-white" />
+              <div className="p-4 bg-gray-900 text-white rounded-2xl shadow-lg">
+                <Calendar className="w-8 h-8" />
               </div>
               <div>
                 <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -563,7 +528,7 @@ export default function PitchCompetitionSection() {
 
             <div className="relative">
               {/* Timeline line */}
-              <div className="absolute left-8 top-8 bottom-8 w-1 bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500"></div>
+              <div className="absolute left-8 top-8 bottom-8 w-1 bg-gray-200 dark:bg-gray-700"></div>
 
               {/* Timeline items */}
               <div className="space-y-8">
@@ -578,15 +543,15 @@ export default function PitchCompetitionSection() {
                     {/* Circle indicator */}
                     <div className="relative z-10">
                       {mounted ? (
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
-                          className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
-                        >
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
+                        className="w-16 h-16 bg-gray-900 text-white rounded-full flex items-center justify-center shadow-lg"
+                      >
                           <span className="text-2xl font-bold text-white">{index + 1}</span>
                         </motion.div>
                       ) : (
-                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                        <div className="w-16 h-16 bg-gray-900 text-white rounded-full flex items-center justify-center shadow-lg">
                           <span className="text-2xl font-bold text-white">{index + 1}</span>
                         </div>
                       )}
@@ -595,13 +560,13 @@ export default function PitchCompetitionSection() {
                     {/* Content */}
                     <motion.div
                       whileHover={{ scale: 1.02, x: 10 }}
-                      className="flex-1 p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
+                      className="flex-1 p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl hover:border-gray-400 dark:hover:border-gray-600 transition-all"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-2xl font-bold text-gray-900 dark:text-white">
                           {item.phase}
                         </h4>
-                        <span className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 text-indigo-700 dark:text-indigo-300 rounded-lg font-semibold text-sm">
+                        <span className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-semibold text-sm">
                           {item.date}
                         </span>
                       </div>
@@ -618,15 +583,15 @@ export default function PitchCompetitionSection() {
               initial={mounted ? { opacity: 0, y: 20 } : false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: mounted ? 0.8 : 0 }}
-              className="mt-10 p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-2 border-amber-200 dark:border-amber-800 rounded-2xl"
+              className="mt-10 p-6 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-2xl"
             >
               <div className="flex items-start gap-3">
-                <Zap className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" />
+                <Zap className="w-6 h-6 text-gray-900 dark:text-gray-100 flex-shrink-0 mt-1" />
                 <div>
-                  <p className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Mark Your Calendar
                   </p>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     Detailed dates will be announced once registration opens. 
                     Make sure to enable notifications to stay updated!
                   </p>
