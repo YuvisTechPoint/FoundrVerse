@@ -65,8 +65,8 @@ function getFirebaseConfig(): FirebaseConfig {
     
     let errorMessage: string;
     if (isProduction) {
-      // User-friendly message for production
-      errorMessage = `Authentication service is temporarily unavailable. Please contact support.`;
+      // More helpful message for production - guide to Vercel setup
+      errorMessage = `Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See VERCEL_ENV_SETUP.md for setup instructions.`;
     } else {
       // Detailed message for development
       errorMessage = `Missing Firebase config. Set the following env vars: ${missing.join(", ")}\n\n` +
@@ -83,7 +83,8 @@ function getFirebaseConfig(): FirebaseConfig {
     if (isProduction) {
       console.error('Firebase configuration error:', {
         missing,
-        message: `Missing Firebase config. Set the following env vars: ${missing.join(", ")}`,
+        message: `Missing Firebase config. Set the following env vars in Vercel: ${missing.join(", ")}`,
+        help: 'See VERCEL_ENV_SETUP.md for instructions',
       });
     }
     
