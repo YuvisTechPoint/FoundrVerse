@@ -174,20 +174,27 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
       const isProduction = process.env.NODE_ENV === 'production';
       let errorMessage = "Google sign-in failed. Please try again later or contact support.";
       
-      if (!isProduction && err instanceof Error) {
-        // Detailed error for development
-        if (err.message.includes("api-key-not-valid") || err.message.includes("API key not valid")) {
-          errorMessage = "Firebase API key is invalid. Please check your environment variables. See VERCEL_ENV_SETUP.md for Vercel deployment or docs/FIREBASE_AUTH.md for local setup.";
+      if (err instanceof Error) {
+        // Check for configuration issues first (both production and development)
+        if (err.message.includes("api-key-not-valid") || err.message.includes("API key not valid") || err.message.includes("Firebase configuration is missing")) {
+          errorMessage = isProduction
+            ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. Visit /setup-help for step-by-step instructions."
+            : "Firebase API key is invalid or missing. Please check your environment variables. See VERCEL_ENV_SETUP.md for Vercel deployment or docs/FIREBASE_AUTH.md for local setup.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
-          errorMessage = "Firebase Auth not configured. Enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";
+          errorMessage = isProduction
+            ? "Google Authentication is not enabled in Firebase. Please enable it in Firebase Console and configure environment variables in Vercel. Visit /setup-help for instructions."
+            : "Firebase Auth not configured. Enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";
         } else if (err.message.includes("auth/")) {
           // Clean up Firebase error messages
           const cleanMessage = err.message
             .replace("Firebase: Error (", "")
             .replace(").", "")
             .replace("auth/", "");
-          errorMessage = cleanMessage || "Authentication error occurred";
-        } else {
+          errorMessage = isProduction 
+            ? "Authentication error occurred. Please check your Firebase configuration in Vercel. Visit /setup-help for help."
+            : (cleanMessage || "Authentication error occurred");
+        } else if (!isProduction) {
+          // Show full error in development
           errorMessage = err.message;
         }
       }
