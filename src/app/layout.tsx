@@ -30,6 +30,17 @@ const themeScript = `
 export const metadata: Metadata = {
   title: "Mewayz - FoundrVerse | India's First Practical Startup School for Students",
   description: "Learn how real founders build. Do it yourself. Get certified. Get internships. Pitch to investors.",
+  icons: {
+    icon: [
+      { url: "/images/mewayz.jpeg", type: "image/jpeg" },
+      { url: "/images/mewayz.jpeg", type: "image/jpeg", sizes: "32x32" },
+      { url: "/images/mewayz.jpeg", type: "image/jpeg", sizes: "16x16" },
+    ],
+    apple: [
+      { url: "/images/mewayz.jpeg", type: "image/jpeg" },
+    ],
+    shortcut: "/images/mewayz.jpeg",
+  },
 };
 
 export default function RootLayout({
