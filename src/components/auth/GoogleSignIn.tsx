@@ -257,14 +257,16 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
         </p>
       )}
       {error && (
-        <div className="mt-2 space-y-2">
-          <p className={`text-sm ${shouldHideButton ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`} aria-live="assertive">
-            {error}
-          </p>
+        <div className="mt-2 space-y-3">
+          <div className={`p-3 rounded-lg ${shouldHideButton ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
+            <p className={`text-sm font-medium ${shouldHideButton ? 'text-gray-700 dark:text-gray-300' : 'text-red-700 dark:text-red-300'}`} aria-live="assertive">
+              {error}
+            </p>
+          </div>
           {(error.includes("Firebase configuration is missing") || error.includes("Vercel Dashboard") || error.includes("setup-help")) && !shouldHideButton ? (
             <Link
               href="/setup-help"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline font-medium"
+              className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg transition-colors shadow-sm"
             >
               View Setup Instructions →
             </Link>
