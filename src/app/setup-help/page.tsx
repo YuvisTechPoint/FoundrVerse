@@ -19,6 +19,16 @@ export default function SetupHelpPage() {
             <p className="text-gray-600 dark:text-gray-400">
               Your deployment needs Firebase environment variables configured in Vercel
             </p>
+            <div className="mt-4">
+              <a
+                href="https://github.com/YuvisTechPoint/FoundrVerse/blob/main/VERCEL_FIREBASE_SETUP_STEPS.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold transition-colors"
+              >
+                📋 View Step-by-Step Checklist <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           <div className="space-y-6 mb-8">
