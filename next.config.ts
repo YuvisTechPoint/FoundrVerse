@@ -73,6 +73,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@heroicons/react'],
   },
+  
+  // Turbopack configuration to fix lockfile warning
+  // Setting the root directory to prevent lockfile detection warnings
+  turbopack: {
+    root: process.cwd(),
+  } as any,
 };
 
 export default nextConfig;

@@ -31,8 +31,12 @@ export async function verifySessionCookie(sessionCookie?: string | null, session
     const auth = getFirebaseAdminAuth();
     const decoded = await auth.verifySessionCookie(sessionCookie, true);
     return decoded;
-  } catch (error) {
-    console.warn("Failed to verify Firebase session cookie", error);
+  } catch (error: any) {
+    // Don't log expected errors like expired sessions - these are normal
+    const errorCode = error?.code || error?.errorInfo?.code;
+    if (errorCode !== "auth/session-cookie-expired") {
+      console.warn("Failed to verify Firebase session cookie", error);
+    }
     return null;
   }
 }
