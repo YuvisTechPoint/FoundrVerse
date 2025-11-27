@@ -120,7 +120,7 @@ export default function TestPaymentPage() {
                 options={{
                   amount,
                   currency: "INR",
-                  name: "Mewayz - FoundrVerse",
+                  name: "foundrverse",
                   description: `Test payment of ${formatPrice(amount)}`,
                   prefill: {
                     email,

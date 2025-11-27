@@ -356,8 +356,8 @@ export default async function DashboardPage() {
 
             {/* Course Features */}
             <div className="border-t-2 border-gray-200 dark:border-gray-700/50 pt-8 mt-8">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Course Features</h3>
-              <div className="grid md:grid-cols-3 gap-4">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8">Course Features</h3>
+              <div className="grid md:grid-cols-3 gap-4 bg-gray-900 dark:bg-gray-950 p-6 rounded-2xl border border-gray-800 dark:border-gray-800">
               {[
                 { 
                   iconName: "BookOpen", 

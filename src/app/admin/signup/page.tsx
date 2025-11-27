@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { createUserWithEmailAndPassword, updateProfile, deleteUser } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowRight, Loader2, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 
 const adminSignupSchema = z.object({
   organizationName: z.string().min(2, "Organization/College name must be at least 2 characters"),
@@ -31,6 +31,7 @@ export default function AdminSignupPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [isFirebaseConfigured, setIsFirebaseConfigured] = useState<boolean | null>(null);
   const {
     register,
     handleSubmit,
@@ -43,12 +44,29 @@ export default function AdminSignupPage() {
   const passwordValue = watch("password");
   const confirmPasswordValue = watch("confirmPassword");
 
+  // Check Firebase configuration on mount
+  useEffect(() => {
+    const checkFirebaseConfig = () => {
+      const auth = getFirebaseAuth();
+      setIsFirebaseConfigured(auth !== null);
+    };
+    checkFirebaseConfig();
+  }, []);
+
   const onSubmit = async (data: AdminSignupForm) => {
     setIsLoading(true);
     let firebaseUser: any = null;
     const auth = getFirebaseAuth();
     
     try {
+      if (!auth) {
+        const isProduction = process.env.NODE_ENV === 'production';
+        throw new Error(
+          isProduction
+            ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
+            : "Firebase is not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup."
+        );
+      }
 
       // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(
@@ -163,6 +181,7 @@ export default function AdminSignupPage() {
 
       let errorMessage = "Failed to create admin account. Please try again.";
       let shouldShowLoginLink = false;
+      let isFirebaseConfigError = false;
       
       // Handle Firebase authentication errors
       if (error.code === "auth/email-already-in-use") {
@@ -173,9 +192,17 @@ export default function AdminSignupPage() {
       } else if (error.code === "auth/weak-password") {
         errorMessage = "Password is too weak. Please use a stronger password (minimum 6 characters).";
       } else if (error.code === "auth/operation-not-allowed") {
-        errorMessage = "Email/password accounts are not enabled. Please contact support.";
+        isFirebaseConfigError = true;
+        const isProduction = process.env.NODE_ENV === 'production';
+        errorMessage = isProduction
+          ? "Email/password signup is not available. Please contact support or check Firebase configuration."
+          : "Email/password authentication is not enabled in Firebase. Go to Firebase Console → Authentication → Sign-in method → Email/Password → Enable, then try again.";
       } else if (error.code === "auth/network-request-failed") {
-        errorMessage = "Network error. Please check your connection and try again.";
+        errorMessage = "Network error. Please check your internet connection and try again.";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage = "Too many requests. Please wait a moment and try again.";
+      } else if (error.code === "auth/quota-exceeded") {
+        errorMessage = "Service temporarily unavailable. Please try again later.";
       } else if (error.message) {
         errorMessage = error.message;
         // Check if error suggests login
@@ -185,12 +212,27 @@ export default function AdminSignupPage() {
             error.message.toLowerCase().includes("already has")) {
           shouldShowLoginLink = true;
         }
+        // Check if it's a Firebase configuration error
+        if (error.message.includes("Firebase") || error.message.includes("configuration") || error.message.includes("not configured")) {
+          isFirebaseConfigError = true;
+        }
       }
 
-      // Show error toast with login link if applicable
+      // Show error toast with login link or setup instructions if applicable
       toast({
         title: "Signup failed",
-        description: shouldShowLoginLink ? (
+        description: isFirebaseConfigError ? (
+          <div className="space-y-2">
+            <p className="text-sm">{errorMessage}</p>
+            <Link 
+              href="/setup-help" 
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white underline hover:no-underline transition-all mt-2"
+            >
+              View Setup Instructions
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        ) : shouldShowLoginLink ? (
           <div className="space-y-2">
             <p className="text-sm">{errorMessage}</p>
             <Link 
@@ -205,7 +247,7 @@ export default function AdminSignupPage() {
           <p className="text-sm">{errorMessage}</p>
         ),
         variant: "destructive",
-        duration: shouldShowLoginLink ? 8000 : 5000, // Show longer if login link is present
+        duration: (isFirebaseConfigError || shouldShowLoginLink) ? 8000 : 5000,
       });
     } finally {
       setIsLoading(false);
@@ -243,6 +285,46 @@ export default function AdminSignupPage() {
             transition={{ duration: 0.5 }}
             className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl p-10 transition-colors duration-300 relative"
           >
+            {/* Firebase Configuration Warning Banner */}
+            <AnimatePresence>
+              {isFirebaseConfigured === false && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl"
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-1">
+                        Firebase Configuration Required
+                      </h3>
+                      <p className="text-sm text-amber-800 dark:text-amber-300 mb-3">
+                        {process.env.NODE_ENV === 'production'
+                          ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
+                          : "Firebase is not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup."}
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          href="/setup-help"
+                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline transition-colors"
+                        >
+                          View Setup Instructions
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        {process.env.NODE_ENV !== 'production' && (
+                          <div className="text-xs text-amber-700 dark:text-amber-400">
+                            Documentation: <span className="font-mono">VERCEL_ENV_SETUP.md</span> or <span className="font-mono">docs/FIREBASE_AUTH.md</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Success Message */}
             <AnimatePresence>
               {signupSuccess && (
@@ -302,7 +384,7 @@ export default function AdminSignupPage() {
                   id="organizationName"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="e.g., MIT, Stanford University, ABC College"
-                  disabled={isLoading || signupSuccess}
+                  disabled={isLoading || signupSuccess || (isFirebaseConfigured === false && typeof window !== 'undefined' && !window.location.hostname.includes('localhost'))}
                 />
                 {errors.organizationName && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -322,7 +404,7 @@ export default function AdminSignupPage() {
                   id="name"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="John Doe"
-                  disabled={isLoading || signupSuccess}
+                  disabled={isLoading || signupSuccess || (isFirebaseConfigured === false && typeof window !== 'undefined' && !window.location.hostname.includes('localhost'))}
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -342,7 +424,8 @@ export default function AdminSignupPage() {
                   id="email"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="admin@yourorganization.com"
-                  disabled={isLoading || signupSuccess}
+                  disabled={isLoading || signupSuccess || (isFirebaseConfigured === false && typeof window !== 'undefined' && !window.location.hostname.includes('localhost'))}
+                  suppressHydrationWarning
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -362,7 +445,7 @@ export default function AdminSignupPage() {
                   id="password"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="••••••••"
-                  disabled={isLoading || signupSuccess}
+                  disabled={isLoading || signupSuccess || (isFirebaseConfigured === false && typeof window !== 'undefined' && !window.location.hostname.includes('localhost'))}
                 />
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -382,7 +465,7 @@ export default function AdminSignupPage() {
                   id="confirmPassword"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="••••••••"
-                  disabled={isLoading || signupSuccess}
+                  disabled={isLoading || signupSuccess || (isFirebaseConfigured === false && typeof window !== 'undefined' && !window.location.hostname.includes('localhost'))}
                 />
                 {errors.confirmPassword && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -400,7 +483,7 @@ export default function AdminSignupPage() {
 
               <button
                 type="submit"
-                disabled={isLoading || signupSuccess}
+                disabled={isLoading || signupSuccess || (isFirebaseConfigured === false && typeof window !== 'undefined' && !window.location.hostname.includes('localhost'))}
                 className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3.5 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (

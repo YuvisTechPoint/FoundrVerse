@@ -6,10 +6,32 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { Check } from "lucide-react";
+import { Check, AlertTriangle, ExternalLink } from "lucide-react";
 import RazorpayCheckout from "@/components/payments/RazorpayCheckout";
+import { motion, AnimatePresence } from "framer-motion";
 
 const COURSE_PRICE = 1499;
+
+type RazorpayConfigStatus = {
+  status: string;
+  clientReady: boolean;
+  serverReady: boolean;
+  required: {
+    client: Array<{ name: string; configured: boolean; hint: string }>;
+    server: Array<{ name: string; configured: boolean; hint: string }>;
+  };
+  summary: {
+    clientConfigured: number;
+    serverConfigured: number;
+    totalRequired: number;
+    missing: number;
+  };
+  instructions: {
+    razorpayDashboard: string;
+    apiKeys: string;
+    documentation: string;
+  };
+};
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -18,6 +40,8 @@ export default function PaymentPage() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [razorpayConfig, setRazorpayConfig] = useState<RazorpayConfigStatus | null>(null);
+  const [isCheckingRazorpay, setIsCheckingRazorpay] = useState(false);
 
   useEffect(() => {
     // Get current user from session
@@ -39,6 +63,67 @@ export default function PaymentPage() {
         setIsLoadingUser(false);
       });
   }, [router]);
+
+  // Check Razorpay configuration on mount (optional - don't block payments)
+  useEffect(() => {
+    const checkRazorpayConfig = async () => {
+      const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+      
+      // In localhost, allow test mode - don't show warnings
+      if (isLocalhost) {
+        setRazorpayConfig({
+          status: "configured", // Allow test mode
+          clientReady: true,
+          serverReady: true,
+          required: { client: [], server: [] },
+          summary: { clientConfigured: 0, serverConfigured: 0, totalRequired: 0, missing: 0 },
+          instructions: {
+            razorpayDashboard: "https://dashboard.razorpay.com",
+            apiKeys: "https://dashboard.razorpay.com/app/keys",
+            documentation: "/setup-help",
+          },
+        });
+        setIsCheckingRazorpay(false);
+        return;
+      }
+
+      // In production, check config but don't block
+      try {
+        const response = await fetch("/api/check-config");
+        if (response.ok) {
+          const data = await response.json();
+          // Check if Razorpay keys exist
+          const hasRazorpayKey = Boolean(
+            process.env.NEXT_PUBLIC_RZP_KEY_ID || 
+            process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+          );
+          
+          setRazorpayConfig({
+            status: hasRazorpayKey ? "configured" : "missing",
+            clientReady: hasRazorpayKey,
+            serverReady: true,
+            required: { client: [], server: [] },
+            summary: { 
+              clientConfigured: hasRazorpayKey ? 1 : 0, 
+              serverConfigured: 0, 
+              totalRequired: 0, 
+              missing: hasRazorpayKey ? 0 : 1 
+            },
+            instructions: {
+              razorpayDashboard: "https://dashboard.razorpay.com",
+              apiKeys: "https://dashboard.razorpay.com/app/keys",
+              documentation: "/setup-help",
+            },
+          });
+        }
+      } catch (error) {
+        // Silently fail - allow payments to work
+      } finally {
+        setIsCheckingRazorpay(false);
+      }
+    };
+    checkRazorpayConfig();
+  }, []);
 
   const handlePaymentSuccess = (paymentId: string, orderId: string) => {
     toast({
@@ -139,6 +224,49 @@ export default function PaymentPage() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Payment Details</h2>
             
             <div className="space-y-6">
+              {/* Razorpay Configuration Warning Banner - Only show in production if keys are missing */}
+              <AnimatePresence>
+                {!isCheckingRazorpay && razorpayConfig && razorpayConfig.status === "missing" && 
+                 typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl"
+                  >
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-1">
+                          Razorpay Configuration Required
+                        </h3>
+                        <p className="text-sm text-amber-800 dark:text-amber-300 mb-3">
+                          Payment gateway is not configured. Please contact support or see docs/RAZORPAY.md for setup instructions.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            href={razorpayConfig.instructions?.documentation || "/setup-help"}
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline transition-colors"
+                          >
+                            View Setup Instructions
+                            <ExternalLink className="w-3 h-3" />
+                          </Link>
+                          <a
+                            href={razorpayConfig.instructions?.apiKeys || "https://dashboard.razorpay.com/app/keys"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline transition-colors"
+                          >
+                            Open Razorpay Dashboard
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                   Secure payment powered by Razorpay
@@ -167,7 +295,7 @@ export default function PaymentPage() {
                   options={{
                     amount: COURSE_PRICE,
                     currency: "INR",
-                    name: "Mewayz - FoundrVerse",
+                    name: "foundrverse",
                     description: "30-Day Startup Blueprint - Course Enrollment",
                     userId: userId,
                     courseId: "30-day-startup-blueprint",
@@ -190,6 +318,7 @@ export default function PaymentPage() {
                       // User closed the payment modal
                     },
                   }}
+                  disabled={false}
                   className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-900 dark:border-white"
                 >
                   Pay {formatPrice(COURSE_PRICE)}

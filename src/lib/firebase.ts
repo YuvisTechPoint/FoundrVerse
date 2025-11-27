@@ -45,7 +45,7 @@ function ensureClientSide() {
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 // This config is loaded from environment variables (better for Next.js)
 // Console equivalent: const firebaseConfig = { apiKey: "...", ... }
-function getFirebaseConfig(): FirebaseConfig {
+function getFirebaseConfig(): FirebaseConfig | null {
   const config: FirebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
@@ -63,32 +63,23 @@ function getFirebaseConfig(): FirebaseConfig {
   if (missing.length) {
     const isProduction = process.env.NODE_ENV === 'production';
     
-    let errorMessage: string;
-    if (isProduction) {
-      // More helpful message for production - guide to Vercel setup
-      errorMessage = `Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. Visit /setup-help for step-by-step instructions.`;
-    } else {
-      // Detailed message for development
-      errorMessage = `Missing Firebase config. Set the following env vars: ${missing.join(", ")}\n\n` +
-        `To fix this:\n` +
-        `1. Create a Firebase project at https://console.firebase.google.com\n` +
-        `2. Enable Google Authentication in Firebase Console\n` +
-        `3. Copy your Firebase config from Project Settings → General → Your apps\n` +
-        `4. Add the values to your .env.local file\n` +
-        `5. See docs/FIREBASE_AUTH.md for detailed instructions\n\n` +
-        `Required variables:\n${missing.map(v => `  - ${v}`).join("\n")}`;
-    }
-    
-    // Log detailed error for developers/debugging
+    // Log warning (not error) since UI handles this gracefully
+    // In development, use warn to avoid alarming console errors
+    // In production, still log as error for debugging
     if (isProduction) {
       console.error('Firebase configuration error:', {
         missing,
         message: `Missing Firebase config. Set the following env vars in Vercel: ${missing.join(", ")}`,
         help: 'See VERCEL_ENV_SETUP.md for instructions',
       });
+    } else {
+      // Use console.warn in development since UI now shows proper warnings
+      console.warn('Firebase configuration not found. Set the following env vars:', missing.join(", "));
+      console.warn('This is expected if Firebase is not configured. See the warning banner on the page for setup instructions.');
     }
     
-    throw new Error(errorMessage);
+    // Return null instead of throwing - let components handle the error gracefully
+    return null;
   }
 
   // Check for placeholder values
@@ -111,26 +102,42 @@ function getFirebaseConfig(): FirebaseConfig {
     .map((key) => requiredEnv[key]);
 
   if (placeholders.length) {
-    const errorMessage = `Firebase config contains placeholder values. Please replace them with your actual Firebase credentials.\n\n` +
-      `Placeholder values found in: ${placeholders.join(", ")}\n\n` +
-      `To fix this:\n` +
-      `1. Go to https://console.firebase.google.com\n` +
-      `2. Select your project (or create one)\n` +
-      `3. Go to Project Settings → General → Your apps\n` +
-      `4. Copy the Firebase config values\n` +
-      `5. Update your .env.local file with the real values\n` +
-      `6. Restart your dev server (npm run dev)\n\n` +
-      `See docs/FIREBASE_AUTH.md for detailed instructions.`;
-    throw new Error(errorMessage);
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction) {
+      console.error('Firebase config contains placeholder values:', placeholders.join(", "));
+    } else {
+      console.warn('Firebase config contains placeholder values:', placeholders.join(", "));
+    }
+    // Return null instead of throwing
+    return null;
   }
 
   // Validate config format
   if (!config.apiKey || config.apiKey.length < 20) {
-    throw new Error("Invalid Firebase API key. Please check NEXT_PUBLIC_FIREBASE_API_KEY in .env.local");
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction) {
+      console.error("Invalid Firebase API key. Please check NEXT_PUBLIC_FIREBASE_API_KEY");
+    } else {
+      console.warn("Invalid Firebase API key. Please check NEXT_PUBLIC_FIREBASE_API_KEY");
+    }
+    return null;
   }
   
-  if (!config.authDomain || !config.authDomain.includes("firebaseapp.com")) {
-    throw new Error("Invalid Firebase auth domain. Please check NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN in .env.local");
+  // Validate auth domain - accept both firebaseapp.com and firebase.app (custom domains)
+  const isValidAuthDomain = config.authDomain && (
+    config.authDomain.includes("firebaseapp.com") || 
+    config.authDomain.includes("firebase.app") ||
+    config.authDomain.includes(".") // Allow custom domains
+  );
+  
+  if (!isValidAuthDomain) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction) {
+      console.error("Invalid Firebase auth domain. Please check NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN");
+    } else {
+      console.warn("Invalid Firebase auth domain. Please check NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN");
+    }
+    return null;
   }
 
   return config;
@@ -138,11 +145,17 @@ function getFirebaseConfig(): FirebaseConfig {
 
 // Initialize Firebase
 // Console equivalent: const app = initializeApp(firebaseConfig);
-export function getFirebaseApp(): FirebaseApp {
+// Returns null if Firebase is not configured (graceful degradation)
+export function getFirebaseApp(): FirebaseApp | null {
   ensureClientSide();
 
   if (!firebaseGlobal.__FIREBASE_APP__) {
     const config = getFirebaseConfig();
+    
+    // If config is missing, return null instead of throwing
+    if (!config) {
+      return null;
+    }
     
     // Check if an app with this name already exists
     const existingApps = getApps();
@@ -156,11 +169,8 @@ export function getFirebaseApp(): FirebaseApp {
         firebaseGlobal.__FIREBASE_APP__ = initializeApp(config);
       } catch (error) {
         console.error("Failed to initialize Firebase app:", error);
-        const isProduction = process.env.NODE_ENV === 'production';
-        const errorMessage = isProduction
-          ? "Authentication service is temporarily unavailable. Please contact support."
-          : `Firebase initialization failed: ${error instanceof Error ? error.message : "Unknown error"}. Please check your Firebase configuration in .env.local or VERCEL_ENV_SETUP.md for Vercel deployment.`;
-        throw new Error(errorMessage);
+        // Return null instead of throwing - let components handle gracefully
+        return null;
       }
     }
   }
@@ -168,7 +178,8 @@ export function getFirebaseApp(): FirebaseApp {
   return firebaseGlobal.__FIREBASE_APP__!;
 }
 
-export function getFirebaseAuth(): Auth {
+// Returns null if Firebase is not configured (graceful degradation)
+export function getFirebaseAuth(): Auth | null {
   ensureClientSide();
 
   if (!firebaseGlobal.__FIREBASE_AUTH__) {
@@ -176,18 +187,16 @@ export function getFirebaseAuth(): Auth {
     
     // Verify app is initialized
     if (!app) {
-      throw new Error("Firebase app is not initialized. Cannot get Auth instance.");
+      // Return null instead of throwing - let components handle gracefully
+      return null;
     }
     
     try {
       firebaseGlobal.__FIREBASE_AUTH__ = getAuth(app);
     } catch (error) {
       console.error("Failed to get Firebase Auth:", error);
-      const isProduction = process.env.NODE_ENV === 'production';
-      const errorMessage = isProduction
-        ? "Authentication service is temporarily unavailable. Please contact support."
-        : `Firebase Auth initialization failed: ${error instanceof Error ? error.message : "Unknown error"}. This usually means the Firebase app configuration is invalid. See VERCEL_ENV_SETUP.md for deployment setup.`;
-      throw new Error(errorMessage);
+      // Return null instead of throwing - let components handle gracefully
+      return null;
     }
   }
 
@@ -207,6 +216,9 @@ export function getFirebaseAnalytics(): Analytics | null {
   if (!firebaseGlobal.__FIREBASE_ANALYTICS__) {
     try {
       const app = getFirebaseApp();
+      if (!app) {
+        return null;
+      }
       // This is equivalent to: const analytics = getAnalytics(app);
       firebaseGlobal.__FIREBASE_ANALYTICS__ = getAnalytics(app);
     } catch (error) {

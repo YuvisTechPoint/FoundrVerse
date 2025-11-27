@@ -16,8 +16,20 @@ export default function TestAuthPage() {
     let unsubscribe = () => {};
 
     try {
-      getFirebaseApp();
+      const app = getFirebaseApp();
       const auth = getFirebaseAuth();
+      
+      if (!app || !auth) {
+        setStatus("error");
+        const isProduction = process.env.NODE_ENV === 'production';
+        setMessage(
+          isProduction
+            ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
+            : "Firebase configuration appears to be missing. Please check your .env.local file or visit /setup-help for setup instructions."
+        );
+        return;
+      }
+      
       setStatus("ready");
       setMessage("Firebase initialized. You can trigger Google sign-in below.");
 

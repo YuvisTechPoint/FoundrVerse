@@ -13,7 +13,7 @@ import GoogleSignIn from "@/components/auth/GoogleSignIn";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, CheckCircle2, XCircle, Loader2, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, XCircle, Loader2, ArrowRight, AlertTriangle } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,6 +31,7 @@ export default function LoginPage() {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [isFirebaseConfigured, setIsFirebaseConfigured] = useState<boolean | null>(null);
   
   const {
     register,
@@ -85,6 +86,22 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const auth = getFirebaseAuth();
+      
+      if (!auth) {
+        const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+        // On localhost, still allow trying (might be configured in .env.local)
+        // In production, show helpful error
+        if (!isLocalhost) {
+          throw new Error(
+            "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
+          );
+        } else {
+          // On localhost, check if we can still proceed (might have local config)
+          throw new Error(
+            "Firebase configuration appears to be missing. Please check your .env.local file or visit /setup-help for setup instructions."
+          );
+        }
+      }
       
       // Sign in with email and password
       const userCredential = await signInWithEmailAndPassword(
@@ -155,6 +172,8 @@ export default function LoginPage() {
           errorMessage = "Too many failed attempts. Please try again later.";
         } else if (error.code === "auth/user-disabled") {
           errorMessage = "This account has been disabled. Please contact support.";
+        } else if (error.code === "auth/operation-not-allowed") {
+          errorMessage = "Email/password authentication is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method → Email/Password, or use Google Sign-In instead.";
         } else if (error.message) {
           errorMessage = error.message;
         }
@@ -166,14 +185,30 @@ export default function LoginPage() {
           errorMessage = "Too many failed attempts. Please try again later.";
         } else if (error.code === "auth/user-disabled") {
           errorMessage = "This account has been disabled. Please contact support.";
+        } else if (error.code === "auth/operation-not-allowed") {
+          errorMessage = "Email/password login is not available. Please use Google Sign-In instead.";
         } else {
           errorMessage = "Login failed. Please try again later or contact support.";
         }
       }
 
+      // Check if this is a Firebase configuration error
+      const isFirebaseConfigError = errorMessage.includes("Firebase") || errorMessage.includes("configuration") || errorMessage.includes("setup-help");
+      
       toast({
         title: "Login failed",
-        description: errorMessage,
+        description: isFirebaseConfigError ? (
+          <div className="space-y-2">
+            <p>{errorMessage.replace('See /setup-help for detailed instructions.', '').replace('visit /setup-help for setup instructions.', '').trim()}</p>
+            <Link 
+              href="/setup-help"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-white underline hover:no-underline"
+            >
+              View Setup Instructions
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        ) : errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -330,6 +365,7 @@ export default function LoginPage() {
                   }`}
                   placeholder="your@email.com"
                   disabled={isLoading}
+                  suppressHydrationWarning
                 />
                 <AnimatePresence>
                   {emailTouched && emailValue && (
@@ -465,6 +501,46 @@ export default function LoginPage() {
               )}
             </motion.button>
           </form>
+
+          {/* Firebase Configuration Warning Banner */}
+          <AnimatePresence>
+            {isFirebaseConfigured === false && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-1">
+                      Firebase Configuration Required
+                    </h3>
+                    <p className="text-sm text-amber-800 dark:text-amber-300 mb-3">
+                      {process.env.NODE_ENV === 'production'
+                        ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
+                        : "Firebase configuration appears to be missing. Please check your .env.local file or visit /setup-help for setup instructions."}
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <Link
+                        href="/setup-help"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline transition-colors"
+                      >
+                        View Setup Instructions
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                      {process.env.NODE_ENV !== 'production' && (
+                        <div className="text-xs text-amber-700 dark:text-amber-400">
+                          Documentation: <span className="font-mono">VERCEL_ENV_SETUP.md</span> or <span className="font-mono">docs/FIREBASE_AUTH.md</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="mt-8">
             <div className="relative">

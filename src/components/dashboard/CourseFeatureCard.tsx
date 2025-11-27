@@ -16,31 +16,43 @@ const iconMap: Record<string, LucideIcon> = {
 
 const variantColors = {
   luxury: {
-    bg: "bg-gradient-to-br from-amber-50 to-amber-100/60 dark:from-amber-950/30 dark:to-amber-900/20",
-    iconBg: "bg-gradient-to-br from-amber-600 to-amber-700 dark:from-amber-600 dark:to-amber-700",
+    // Dark brown/amber theme with glowing orange border
+    bg: "bg-gradient-to-br from-amber-950/90 via-amber-900/80 to-amber-950/90 dark:from-amber-950/95 dark:via-amber-900/90 dark:to-amber-950/95",
+    iconBg: "bg-white/10 dark:bg-white/10",
     iconColor: "text-white",
-    border: "border-2 border-amber-200 dark:border-amber-800/40",
-    glow: "shadow-md shadow-amber-500/10 dark:shadow-amber-500/20",
-    hoverGlow: "group-hover:shadow-lg group-hover:shadow-amber-500/20 dark:group-hover:shadow-amber-500/40",
-    hoverBorder: "group-hover:border-amber-300 dark:group-hover:border-amber-700",
+    border: "border-2 border-orange-500/60 dark:border-orange-500/70",
+    glow: "shadow-lg shadow-orange-500/30 dark:shadow-orange-500/40",
+    hoverGlow: "group-hover:shadow-xl group-hover:shadow-orange-500/50 dark:group-hover:shadow-orange-500/60",
+    hoverBorder: "group-hover:border-orange-400 dark:group-hover:border-orange-400",
+    textColor: "text-white dark:text-white",
+    descColor: "text-white/90 dark:text-white/90",
+    linkColor: "text-orange-400 dark:text-orange-400",
   },
   diamond: {
-    bg: "bg-gradient-to-br from-indigo-50 to-indigo-100/60 dark:from-indigo-950/30 dark:to-indigo-900/20",
-    iconBg: "bg-gradient-to-br from-indigo-700 to-indigo-800 dark:from-indigo-500 dark:to-indigo-600",
+    // Dark blue-grey theme
+    bg: "bg-gradient-to-br from-slate-800/90 via-slate-700/80 to-slate-800/90 dark:from-slate-800/95 dark:via-slate-700/90 dark:to-slate-800/95",
+    iconBg: "bg-white/10 dark:bg-white/10",
     iconColor: "text-white",
-    border: "border-2 border-indigo-200 dark:border-indigo-800/40",
-    glow: "shadow-md shadow-indigo-500/10 dark:shadow-indigo-500/20",
-    hoverGlow: "group-hover:shadow-lg group-hover:shadow-indigo-500/20 dark:group-hover:shadow-indigo-500/40",
-    hoverBorder: "group-hover:border-indigo-300 dark:group-hover:border-indigo-700",
+    border: "border border-slate-600/50 dark:border-slate-600/60",
+    glow: "shadow-md shadow-slate-500/20 dark:shadow-slate-500/30",
+    hoverGlow: "group-hover:shadow-lg group-hover:shadow-slate-500/30 dark:group-hover:shadow-slate-500/40",
+    hoverBorder: "group-hover:border-slate-500 dark:group-hover:border-slate-500",
+    textColor: "text-white dark:text-white",
+    descColor: "text-white/90 dark:text-white/90",
+    linkColor: "text-orange-400 dark:text-orange-400",
   },
   platinum: {
-    bg: "bg-gradient-to-br from-slate-50 to-slate-100/60 dark:from-slate-800/30 dark:to-slate-700/20",
-    iconBg: "bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-600 dark:to-slate-700",
+    // Dark blue-grey theme (same as diamond for consistency)
+    bg: "bg-gradient-to-br from-slate-800/90 via-slate-700/80 to-slate-800/90 dark:from-slate-800/95 dark:via-slate-700/90 dark:to-slate-800/95",
+    iconBg: "bg-white/10 dark:bg-white/10",
     iconColor: "text-white",
-    border: "border-2 border-slate-200 dark:border-slate-700/40",
-    glow: "shadow-md shadow-slate-500/10 dark:shadow-slate-500/20",
-    hoverGlow: "group-hover:shadow-lg group-hover:shadow-slate-500/20 dark:group-hover:shadow-slate-500/40",
-    hoverBorder: "group-hover:border-slate-300 dark:group-hover:border-slate-600",
+    border: "border border-slate-600/50 dark:border-slate-600/60",
+    glow: "shadow-md shadow-slate-500/20 dark:shadow-slate-500/30",
+    hoverGlow: "group-hover:shadow-lg group-hover:shadow-slate-500/30 dark:group-hover:shadow-slate-500/40",
+    hoverBorder: "group-hover:border-slate-500 dark:group-hover:border-slate-500",
+    textColor: "text-white dark:text-white",
+    descColor: "text-white/90 dark:text-white/90",
+    linkColor: "text-orange-400 dark:text-orange-400",
   },
 };
 
@@ -109,44 +121,35 @@ export default function CourseFeatureCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}
-      whileHover={{ y: -6, scale: 1.03 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={`group relative p-6 rounded-2xl ${colors.border} ${colors.hoverBorder} ${colors.bg} backdrop-blur-sm transition-all duration-500 ${colors.glow} ${colors.hoverGlow} overflow-hidden cursor-pointer w-full text-left active:scale-[0.98]`}
     >
       {/* Animated background gradient on hover */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${variant === 'luxury' ? 'from-amber-500/10' : variant === 'diamond' ? 'from-indigo-500/10' : 'from-slate-500/10'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+      <div className={`absolute inset-0 ${variant === 'luxury' ? 'bg-gradient-to-br from-orange-500/10 to-transparent' : 'bg-gradient-to-br from-slate-500/10 to-transparent'} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
       
       {/* Subtle shine effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
       
-      {/* Arrow indicator */}
-      <motion.div 
-        className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        whileHover={{ x: 4 }}
-      >
-        <ArrowRight className={`w-5 h-5 ${variant === 'luxury' ? 'text-amber-600 dark:text-amber-400' : variant === 'diamond' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'}`} strokeWidth={2.5} />
-      </motion.div>
-      
-      {/* Click indicator badge */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className={`px-2 py-1 rounded-lg text-xs font-semibold ${variant === 'luxury' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : variant === 'diamond' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300'}`}>
-          Click to explore
-        </div>
+      {/* Click to explore link */}
+      <div className="absolute bottom-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <span className={`text-sm font-medium ${colors.linkColor}`}>Click to explore</span>
+        <ArrowRight className={`w-4 h-4 ${colors.linkColor}`} strokeWidth={2.5} />
       </div>
       
       <div className="relative flex items-start gap-4">
         <motion.div
-          whileHover={{ scale: 1.15, rotate: 8 }}
+          whileHover={{ scale: 1.1, rotate: 5 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className={`flex-shrink-0 w-14 h-14 rounded-xl ${colors.iconBg} flex items-center justify-center ${colors.iconColor} shadow-lg group-hover:shadow-xl transition-shadow duration-300 ring-1 ring-black/10 dark:ring-white/10`}
+          className={`flex-shrink-0 w-12 h-12 rounded-lg ${colors.iconBg} flex items-center justify-center ${colors.iconColor} shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
         >
-          <Icon size={22} strokeWidth={2.5} className="drop-shadow-md" />
+          <Icon size={20} strokeWidth={2.5} className="drop-shadow-sm" />
         </motion.div>
-        <div className="flex-1 min-w-0 pt-0.5 pr-6">
-          <h4 className="font-bold text-gray-900 dark:text-white text-base mb-1.5 leading-tight group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
+        <div className="flex-1 min-w-0 pt-0.5 pr-16">
+          <h4 className={`font-bold ${colors.textColor} text-base mb-2 leading-tight transition-colors`}>
             {title}
           </h4>
-          <p className="text-sm text-gray-700 dark:text-gray-400 leading-relaxed group-hover:text-gray-800 dark:group-hover:text-gray-300 transition-colors">
+          <p className={`text-sm ${colors.descColor} leading-relaxed transition-colors`}>
             {desc}
           </p>
         </div>

@@ -53,17 +53,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    try {
-      // Ensure Razorpay keys are configured
-      ensureRazorpayKeys();
-    } catch (error: any) {
-      // Return error response if Razorpay keys are not configured
+    // Check Razorpay keys - require them for actual payments
+    const { keyId, keySecret } = ensureRazorpayKeys();
+    
+    if (!keyId || !keySecret) {
       return NextResponse.json(
         {
-          error: 'Razorpay keys not configured',
-          message: 'Please set RZP_KEY_ID and RZP_KEY_SECRET environment variables to enable payments.',
+          error: 'Razorpay configuration missing',
+          message: 'Razorpay keys are not configured. Please set RZP_KEY_ID and RZP_KEY_SECRET in your .env.local file. Get keys from https://dashboard.razorpay.com/app/keys',
+          setupRequired: true,
         },
-        { status: 500 }
+        { status: 503 }
       );
     }
 
@@ -108,6 +108,9 @@ export async function POST(request: NextRequest) {
       note: paymentEmail ? 'Payment linked to authenticated user account with email' : 'WARNING: Payment created without email',
     });
 
+    // Get keyId for client (use test key if not configured)
+    const clientKeyId = process.env.NEXT_PUBLIC_RZP_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    
     return NextResponse.json({
       orderId: order.id,
       amount: Number(order.amount) / 100,
@@ -115,16 +118,28 @@ export async function POST(request: NextRequest) {
       receipt: order.receipt,
       status: order.status,
       paymentId: payment.id,
-      keyId: process.env.NEXT_PUBLIC_RZP_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || null,
+      keyId: clientKeyId || null, // Return null if not configured - client will handle
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order (create-order):', error);
+    
+    // Check if this is a Razorpay configuration error
+    const errorMessage = error.message || 'Unknown error';
+    const isConfigError = errorMessage.includes('Razorpay') && 
+                         (errorMessage.includes('not configured') || 
+                          errorMessage.includes('configuration'));
+    
     return NextResponse.json(
       {
-        error: 'Failed to create order',
-        message: error.message || 'Unknown error',
+        error: isConfigError ? 'Razorpay configuration missing' : 'Failed to create order',
+        message: isConfigError 
+          ? (process.env.NODE_ENV === 'development' || request.headers.get('host')?.includes('localhost')
+              ? 'Razorpay keys are not configured. Please set RZP_KEY_ID and RZP_KEY_SECRET in your .env.local file. See docs/RAZORPAY.md for setup instructions.'
+              : 'Payment gateway is not configured. Please contact support or see docs/RAZORPAY.md for setup instructions.')
+          : errorMessage,
+        setupRequired: isConfigError,
       },
-      { status: 500 }
+      { status: isConfigError ? 503 : 500 }
     );
   }
 }

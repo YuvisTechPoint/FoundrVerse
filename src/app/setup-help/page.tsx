@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   CheckCircle, 
   XCircle, 
@@ -45,6 +46,7 @@ type ConfigResponse = {
 };
 
 export default function SetupHelpPage() {
+  const { toast } = useToast();
   const [config, setConfig] = useState<ConfigResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,8 +65,17 @@ export default function SetupHelpPage() {
       // Auto-advance to appropriate step based on config status
       if (data.clientReady && data.serverReady) {
         setActiveStep(4);
+        // If fully configured, show success message
+        if (data.status === 'configured') {
+          toast({
+            title: "Configuration Complete!",
+            description: "All Firebase variables are configured. You can now use authentication.",
+          });
+        }
       } else if (data.summary.configured > 0) {
         setActiveStep(3);
+      } else {
+        setActiveStep(1);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -75,7 +86,16 @@ export default function SetupHelpPage() {
 
   useEffect(() => {
     checkConfig();
-  }, []);
+    
+    // Auto-refresh every 30 seconds if not fully configured
+    const interval = setInterval(() => {
+      if (config && config.status !== 'configured') {
+        checkConfig();
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [config]);
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -93,7 +113,7 @@ export default function SetupHelpPage() {
 
   const envVarExamples: Record<string, string> = {
     "NEXT_PUBLIC_FIREBASE_API_KEY": "AIzaSyCYm9zNzLIAfNlgNdjQ_em89UUy_dMaXU4",
-    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "foundrverse-71575.firebaseapp.com",
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "foundrverse.firebase.app",
     "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "foundrverse-71575",
     "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "foundrverse-71575.firebasestorage.app",
     "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "413817556532",

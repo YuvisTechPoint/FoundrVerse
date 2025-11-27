@@ -20,7 +20,7 @@
    
    ```
    NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=foundrverse-71575.firebaseapp.com
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=foundrverse.firebase.app
    NEXT_PUBLIC_FIREBASE_PROJECT_ID=foundrverse-71575
    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=foundrverse-71575.firebasestorage.app
    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id

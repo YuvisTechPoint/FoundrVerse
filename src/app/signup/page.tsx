@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import GoogleSignIn from "@/components/auth/GoogleSignIn";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { ArrowRight } from "lucide-react";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -41,6 +42,19 @@ export default function SignupPage() {
     setIsLoading(true);
     try {
       const auth = getFirebaseAuth();
+      
+      if (!auth) {
+        const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+        if (!isLocalhost) {
+          throw new Error(
+            "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
+          );
+        } else {
+          throw new Error(
+            "Firebase configuration appears to be missing. Please check your .env.local file or visit /setup-help for setup instructions."
+          );
+        }
+      }
       
       // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(
@@ -133,9 +147,23 @@ export default function SignupPage() {
         }
       }
 
+      // Check if this is a Firebase configuration error
+      const isFirebaseConfigError = errorMessage.includes("Firebase") || errorMessage.includes("configuration") || errorMessage.includes("setup-help");
+      
       toast({
         title: "Signup failed",
-        description: errorMessage,
+        description: isFirebaseConfigError ? (
+          <div className="space-y-2">
+            <p>{errorMessage.replace('See /setup-help for detailed instructions.', '').replace('visit /setup-help for setup instructions.', '').trim()}</p>
+            <Link 
+              href="/setup-help"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-white underline hover:no-underline"
+            >
+              View Setup Instructions
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        ) : errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -222,6 +250,7 @@ export default function SignupPage() {
                 id="email"
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder="your@email.com"
+                suppressHydrationWarning
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>

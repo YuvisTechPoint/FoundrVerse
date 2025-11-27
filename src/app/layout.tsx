@@ -28,7 +28,7 @@ const themeScript = `
 `;
 
 export const metadata: Metadata = {
-  title: "Mewayz - FoundrVerse | India's First Practical Startup School for Students",
+  title: "foundrverse | India's First Practical Startup School for Students",
   description: "Learn how real founders build. Do it yourself. Get certified. Get internships. Pitch to investors.",
   icons: {
     icon: [

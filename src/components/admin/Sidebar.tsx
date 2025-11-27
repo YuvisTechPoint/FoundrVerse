@@ -15,7 +15,8 @@ import {
   LogOut,
   Menu,
   X,
-  CreditCard
+  CreditCard,
+  FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PremiumIcon } from "@/components/ui/premium-icon";
@@ -23,6 +24,7 @@ import { PremiumIcon } from "@/components/ui/premium-icon";
 const navItems = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/students", label: "Students", icon: Users },
+  { href: "/admin/assignments", label: "Assignments", icon: FileText },
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/revenue", label: "Revenue", icon: DollarSign },
   { href: "/admin/internships", label: "Internships", icon: Briefcase },

@@ -49,6 +49,9 @@ export default function RazorpayCheckout({
   const razorpayKeyId =
     process.env.NEXT_PUBLIC_RZP_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
+  // Check if Razorpay public key is configured
+  const isRazorpayConfigured = Boolean(razorpayKeyId);
+
   useEffect(() => {
     // Check if Razorpay is already loaded
     if (typeof window !== "undefined" && window.Razorpay) {
@@ -112,21 +115,54 @@ const handlePayment = async () => {
 
     if (!orderResponse.ok) {
       const error = await orderResponse.json().catch(() => ({}));
-      throw new Error(error.message || 'Failed to create order');
+      const errorMessage = error.message || error.error || 'Failed to create order';
+      
+      // Check if this is a Razorpay configuration error
+      if (error.setupRequired || errorMessage.includes('Razorpay') || errorMessage.includes('configuration')) {
+        const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+        if (isLocalhost) {
+          throw new Error('Razorpay keys are not configured. Please set RZP_KEY_ID and RZP_KEY_SECRET in your .env.local file. See docs/RAZORPAY.md for setup instructions.');
+        } else {
+          throw new Error('Payment gateway is not configured. Please contact support or see docs/RAZORPAY.md for setup instructions.');
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const orderData = await orderResponse.json();
 
-    // 3. Open Razorpay checkout
+    // Check if Razorpay public key is available before opening checkout
+    const finalKeyId = orderData.keyId || razorpayKeyId;
+    
+    if (!finalKeyId) {
+      const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+      throw new Error(
+        isLocalhost
+          ? 'Razorpay public key (NEXT_PUBLIC_RZP_KEY_ID) is not configured. Please set it in your .env.local file. Get keys from https://dashboard.razorpay.com/app/keys'
+          : 'Payment gateway is not fully configured. Please contact support.'
+      );
+    }
+
+    // 3. Open Razorpay checkout (only if keys are configured)
+    // Razorpay expects amount in paise (smallest currency unit), so multiply by 100
+    const amountInPaise = Math.round((orderData.amount || options.amount) * 100);
+    
     const razorpayOptions = {
-      key: razorpayKeyId,
-      amount: orderData.amount,
-      currency: orderData.currency || 'INR',
-      name: options.name || 'Startup School',
+      key: finalKeyId,
+      amount: amountInPaise, // Amount in paise
+      currency: orderData.currency || options.currency || 'INR',
+      name: options.name || 'foundrverse',
       description: options.description || 'Payment for course enrollment',
       order_id: orderData.orderId,
-      prefill: options.prefill || {},
-      notes: options.notes || {},
+      prefill: {
+        ...options.prefill,
+        email: options.prefill?.email || userEmail,
+      },
+      notes: {
+        ...options.notes,
+        ...options.metadata,
+      },
       theme: {
         color: '#4F46E5',
       },
@@ -230,6 +266,11 @@ const handlePayment = async () => {
       },
     };
 
+    // Ensure Razorpay is loaded before creating instance
+    if (!window.Razorpay) {
+      throw new Error('Razorpay SDK failed to load. Please refresh the page and try again.');
+    }
+
     const rzp = new window.Razorpay(razorpayOptions);
     
     rzp.on('payment.failed', function (response: any) {
@@ -237,7 +278,11 @@ const handlePayment = async () => {
       options.onError?.(response.error?.description || 'Payment failed');
     });
 
+    // Open Razorpay payment gateway
     rzp.open();
+    
+    // Set loading to false when modal opens (it's now in Razorpay's control)
+    setIsLoading(false);
   } catch (error: any) {
     console.error('Payment error:', error);
     setIsLoading(false);
@@ -261,8 +306,15 @@ const handlePayment = async () => {
       />
       <button
         onClick={handlePayment}
-        disabled={disabled || isLoading || !scriptLoaded || scriptError}
+        disabled={disabled || isLoading}
         className={className}
+        title={
+          disabled
+            ? "Payment is disabled"
+            : isLoading
+            ? "Processing payment..."
+            : undefined
+        }
       >
         {isLoading
           ? "Processing..."
@@ -271,7 +323,7 @@ const handlePayment = async () => {
           : children}
       </button>
       {scriptError && (
-        <p className="text-sm text-red-600 mt-2">
+        <p className="text-sm text-red-600 dark:text-red-400 mt-2">
           Failed to load payment gateway. Please refresh the page.
         </p>
       )}

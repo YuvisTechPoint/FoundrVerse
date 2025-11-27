@@ -31,8 +31,22 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
   useEffect(() => {
     try {
       const instance = getFirebaseAuth();
-      setAuth(instance);
-      setError(null);
+      
+      if (!instance) {
+        // Firebase is not configured - don't show error in localhost (might be configured locally)
+        const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+        if (!isLocalhost) {
+          const errorMessage = "Firebase configuration is missing. Please configure environment variables. Click below for setup instructions.";
+          setError(errorMessage);
+        } else {
+          // On localhost, silently handle - user might have .env.local configured
+          setError(null);
+        }
+        setAuth(null);
+      } else {
+        setAuth(instance);
+        setError(null);
+      }
     } catch (err) {
       console.error("Failed to load Firebase auth", err);
       
@@ -49,7 +63,7 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
             err.message.includes("temporarily unavailable")) {
           errorMessage = isProduction
             ? "Firebase configuration is missing. Please configure environment variables in Vercel Dashboard. See /setup-help for detailed instructions."
-            : "Firebase not configured. Please set up your Firebase credentials. See VERCEL_ENV_SETUP.md for Vercel deployment instructions or docs/FIREBASE_AUTH.md for local setup.";
+            : "Firebase configuration is missing. Click below for setup instructions.";
         } else if (err.message.includes("configuration-not-found") || err.message.includes("configuration not found")) {
           errorMessage = "Firebase Auth configuration not found. Please enable Google Authentication in Firebase Console: Authentication → Sign-in method → Google → Enable";
         } else if (!isProduction) {
@@ -60,7 +74,7 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
       }
       
       setError(errorMessage);
-      // Don't set auth to null - keep it null so button is hidden
+      setAuth(null);
     }
     setIsInitializing(false);
   }, []);
@@ -270,14 +284,18 @@ export function GoogleSignIn({ redirectTo = "/dashboard", className }: Props) {
               {error}
             </p>
           </div>
-          {(error.includes("Firebase configuration is missing") || error.includes("Vercel Dashboard") || error.includes("setup-help")) && !shouldHideButton ? (
+          {(error.includes("Firebase configuration is missing") || 
+            error.includes("Firebase") || 
+            error.includes("Vercel Dashboard") || 
+            error.includes("setup-help") ||
+            error.includes("not configured")) && (
             <Link
               href="/setup-help"
-              className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg transition-colors shadow-sm"
+              className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg transition-colors shadow-sm"
             >
               View Setup Instructions →
             </Link>
-          ) : null}
+          )}
         </div>
       )}
     </div>

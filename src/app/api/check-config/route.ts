@@ -24,14 +24,49 @@ export async function GET() {
 
   const checkVar = (name: string): { name: string; configured: boolean; hint: string } => {
     const value = process.env[name];
-    const isConfigured = Boolean(value && value.length > 0 && !value.startsWith("your-"));
+    
+    // More robust validation
+    const placeholderPatterns = [
+      /^your[_-]/i,
+      /^change[_-]me/i,
+      /^placeholder/i,
+      /^example/i,
+      /^test[_-]value/i,
+      /your[-_]firebase/i,
+      /your[-_]project/i,
+      /xxxxx/i,
+      /\.\.\./i,
+    ];
+    
+    const isPlaceholder = value && placeholderPatterns.some(pattern => pattern.test(value));
+    const isEmpty = !value || value.trim().length === 0;
+    const isConfigured = !isEmpty && !isPlaceholder;
+    
+    // Additional validation for specific variables
+    let isValid = isConfigured;
+    if (isConfigured && value) {
+      if (name.includes("API_KEY") && value.length < 20) {
+        isValid = false;
+      } else if (name.includes("AUTH_DOMAIN") && !value.includes("firebaseapp.com") && !value.includes("firebase.app") && !value.includes(".")) {
+        isValid = false;
+      } else if (name.includes("STORAGE_BUCKET") && !value.includes("firebasestorage.app")) {
+        isValid = false;
+      } else if (name.includes("SERVICE_ACCOUNT") && !value.startsWith("{")) {
+        // Service account should be JSON
+        try {
+          JSON.parse(value);
+        } catch {
+          isValid = false;
+        }
+      }
+    }
     
     let hint = "";
-    if (!isConfigured) {
+    if (!isValid) {
       if (name.includes("API_KEY")) {
         hint = "Get from Firebase Console → Project Settings → General → Your apps";
       } else if (name.includes("AUTH_DOMAIN")) {
-        hint = "Format: your-project-id.firebaseapp.com";
+        hint = "Format: your-project-id.firebaseapp.com or your-custom.firebase.app (custom domain)";
       } else if (name.includes("PROJECT_ID")) {
         hint = "Your Firebase project ID (e.g., foundrverse-71575)";
       } else if (name.includes("STORAGE_BUCKET")) {
@@ -41,13 +76,13 @@ export async function GET() {
       } else if (name.includes("APP_ID")) {
         hint = "Get from Firebase Console → Project Settings → General → Your apps";
       } else if (name.includes("SERVICE_ACCOUNT")) {
-        hint = "Get from Firebase Console → Project Settings → Service Accounts → Generate new private key";
+        hint = "Get from Firebase Console → Project Settings → Service Accounts → Generate new private key. Paste entire JSON as single-line string.";
       } else if (name.includes("MEASUREMENT_ID")) {
         hint = "Optional: For Google Analytics integration";
       }
     }
     
-    return { name, configured: isConfigured, hint };
+    return { name, configured: isValid, hint };
   };
 
   const clientConfig = requiredClientVars.map(checkVar);
