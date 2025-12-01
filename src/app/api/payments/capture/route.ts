@@ -46,7 +46,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     paymentId,
     captureAmount || payment.amount * 100, // amount in paise
     payment.currency || 'INR' // currency
-  ).catch((error) => {
+  ).catch((error: unknown) => {
     logger.error('Failed to capture payment via Razorpay', error);
     throw new ApiException(
       `Failed to capture payment: ${error instanceof Error ? error.message : 'Unknown error'}`,

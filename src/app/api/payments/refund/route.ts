@@ -53,7 +53,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   // Create refund via Razorpay
   const razorpay = getRazorpayClient();
-  const refund = await razorpay.payments.refund(paymentId, refundOptions).catch((error) => {
+  const refund = await razorpay.payments.refund(paymentId, refundOptions).catch((error: unknown) => {
     logger.error('Failed to create refund via Razorpay', error);
     throw new ApiException(
       `Failed to create refund: ${error instanceof Error ? error.message : 'Unknown error'}`,

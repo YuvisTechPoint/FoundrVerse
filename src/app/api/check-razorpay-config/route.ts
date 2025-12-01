@@ -33,10 +33,11 @@ export async function GET() {
       }
     } else {
       // Additional validation for configured variables
-      if (value.startsWith("your-") || value.startsWith("placeholder") || value.includes("example.com")) {
+      const v = String(value);
+      if (v.startsWith("your-") || v.startsWith("placeholder") || v.includes("example.com")) {
         isConfigured = false;
         hint = "Contains placeholder value. Replace with actual Razorpay key.";
-      } else if (name.includes("KEY_ID") && !value.startsWith("rzp_")) {
+      } else if (name.includes("KEY_ID") && !v.startsWith("rzp_")) {
         isConfigured = false;
         hint = "Invalid Razorpay Key ID format. Should start with 'rzp_'.";
       }

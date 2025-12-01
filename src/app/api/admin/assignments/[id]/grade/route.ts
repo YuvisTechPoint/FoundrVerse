@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth-middleware";
+import type { AuthenticatedRequest } from "@/lib/auth-middleware";
 import { gradeSubmission } from "@/lib/db/services/assignments";
 import { withErrorHandling, errorResponse, successResponse, validateRequired, validateNumber } from "@/lib/api-utils";
 import { logger } from "@/lib/logger";
 
 export const POST = withErrorHandling(
   withAdminAuth(async (
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    request: AuthenticatedRequest,
+    ...args: unknown[]
   ) => {
     try {
+      const { params } = (args[0] as { params: Promise<{ id: string }> });
       const submissionId = (await params).id;
       const body = await request.json();
       const { score, maxScore, feedback, status } = body;
@@ -17,9 +19,16 @@ export const POST = withErrorHandling(
       // Validate required fields
       validateRequired({ score, maxScore, status }, ["score", "maxScore", "status"]);
 
-      // Validate numbers
-      validateNumber(score, "score", 0, maxScore);
-      validateNumber(maxScore, "maxScore", 1, 1000);
+      // Validate numbers with bounds
+      const scoreValidation = validateNumber(Number(score), 0, Number(maxScore));
+      if (!scoreValidation.isValid) {
+        return errorResponse(scoreValidation.error || "Invalid score", 400);
+      }
+
+      const maxScoreValidation = validateNumber(Number(maxScore), 1, 1000);
+      if (!maxScoreValidation.isValid) {
+        return errorResponse(maxScoreValidation.error || "Invalid max score", 400);
+      }
 
       if (!["graded", "revision_required"].includes(status)) {
         return errorResponse("Invalid status. Must be 'graded' or 'revision_required'", 400);
