@@ -7,10 +7,10 @@ import { logger } from "@/lib/logger";
 export const POST = withErrorHandling(
   withAdminAuth(async (
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) => {
     try {
-      const submissionId = params.id;
+      const submissionId = (await params).id;
       const body = await request.json();
       const { score, maxScore, feedback, status } = body;
 

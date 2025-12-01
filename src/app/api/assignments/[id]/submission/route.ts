@@ -9,9 +9,9 @@ const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
 
 export const GET = withErrorHandling(async (
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) => {
-  const { params } = context;
+  const { id } = await context.params;
   const cookieStore = await request.cookies;
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
   const sessionSignature = cookieStore.get(SESSION_SIGNATURE_COOKIE_NAME)?.value ?? null;
@@ -23,7 +23,7 @@ export const GET = withErrorHandling(async (
   }
 
   try {
-    const assignmentId = params.id;
+    const assignmentId = id;
     const submission = await getUserSubmissionForAssignment(decoded.uid, assignmentId);
 
     logger.info("Assignment submission fetched", {
