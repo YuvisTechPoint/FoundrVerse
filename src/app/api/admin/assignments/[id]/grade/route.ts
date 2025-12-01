@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth-middleware";
 import type { AuthenticatedRequest } from "@/lib/auth-middleware";
 import { gradeSubmission } from "@/lib/db/services/assignments";
@@ -11,21 +11,40 @@ export const POST = withErrorHandling(
     ...args: unknown[]
   ) => {
     try {
-      const { params } = (args[0] as { params: Promise<{ id: string }> });
-      const submissionId = (await params).id;
+      // Extract dynamic route params (Next.js 16: params may be a Promise)
+      const firstArg = args[0] as { params?: unknown } | undefined;
+      let submissionId: string | undefined;
+
+      if (firstArg && typeof firstArg === "object" && firstArg.params) {
+        const paramsAny = (firstArg as { params: unknown }).params as unknown;
+        if (paramsAny && typeof (paramsAny as Promise<unknown>).then === "function") {
+          const resolved = await (paramsAny as Promise<{ id: string }>);
+          submissionId = resolved.id;
+        } else {
+          submissionId = (paramsAny as { id: string }).id;
+        }
+      }
+
+      if (!submissionId) {
+        return errorResponse("Missing route parameter 'id'", 400);
+      }
+
       const body = await request.json();
       const { score, maxScore, feedback, status } = body;
 
       // Validate required fields
-      validateRequired({ score, maxScore, status }, ["score", "maxScore", "status"]);
+      const required = validateRequired({ score, maxScore, status }, ["score", "maxScore", "status"]);
+      if (!required.isValid) {
+        return errorResponse(`Missing required fields: ${required.missing.join(", ")}`, 400);
+      }
 
       // Validate numbers with bounds
-      const scoreValidation = validateNumber(Number(score), 0, Number(maxScore));
+      const scoreValidation = validateNumber(score, 0, maxScore);
       if (!scoreValidation.isValid) {
         return errorResponse(scoreValidation.error || "Invalid score", 400);
       }
 
-      const maxScoreValidation = validateNumber(Number(maxScore), 1, 1000);
+      const maxScoreValidation = validateNumber(maxScore, 1, 1000);
       if (!maxScoreValidation.isValid) {
         return errorResponse(maxScoreValidation.error || "Invalid max score", 400);
       }
@@ -34,17 +53,12 @@ export const POST = withErrorHandling(
         return errorResponse("Invalid status. Must be 'graded' or 'revision_required'", 400);
       }
 
-      // Get admin user ID from session
-      const cookieStore = await request.cookies;
-      const sessionCookie = cookieStore.get("session")?.value ?? null;
-      const sessionSignature = cookieStore.get("session_sig")?.value ?? null;
-      
-      // Verify session to get user ID (simplified - in production, extract from auth middleware)
-      let gradedBy = "admin"; // TODO: Extract from auth token
+      // Use authenticated user id when available
+      const gradedBy = request.user?.uid ?? "admin";
 
       const submission = await gradeSubmission(submissionId, {
-        score: parseInt(score, 10),
-        maxScore: parseInt(maxScore, 10),
+        score: typeof score === "string" ? parseInt(score, 10) : Number(score),
+        maxScore: typeof maxScore === "string" ? parseInt(maxScore, 10) : Number(maxScore),
         feedback: feedback || "",
         gradedBy,
         status: status as "graded" | "revision_required",
@@ -66,9 +80,10 @@ export const POST = withErrorHandling(
         submission,
         message: "Assignment graded successfully",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Failed to grade submission", error);
-      return errorResponse(error.message || "Failed to grade submission", 500);
+      const message = error instanceof Error ? error.message : "Failed to grade submission";
+      return errorResponse(message, 500);
     }
   })
 );
