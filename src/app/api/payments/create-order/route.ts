@@ -121,25 +121,57 @@ export async function POST(request: NextRequest) {
       keyId: clientKeyId || null, // Return null if not configured - client will handle
     });
   } catch (error: any) {
-    console.error('Error creating Razorpay order (create-order):', error);
+    // Better error extraction
+    let errorMessage = 'Unknown error';
+    let errorDetails: any = {};
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = {
+        name: error.name,
+        stack: error.stack,
+      };
+    } else if (typeof error === 'object' && error !== null) {
+      errorMessage = (error as any).message || (error as any).error?.message || JSON.stringify(error);
+      errorDetails = error;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+
+    console.error('Error creating Razorpay order (create-order) - Full details:', {
+      error,
+      errorMessage,
+      errorDetails,
+      errorType: typeof error,
+      isError: error instanceof Error,
+    });
     
     // Check if this is a Razorpay configuration error
-    const errorMessage = error.message || 'Unknown error';
     const isConfigError = errorMessage.includes('Razorpay') && 
                          (errorMessage.includes('not configured') || 
-                          errorMessage.includes('configuration'));
+                          errorMessage.includes('configuration') ||
+                          errorMessage.includes('keys are not configured'));
+
+    // Check for authentication errors
+    const isAuthError = errorMessage.includes('authentication') ||
+                       errorMessage.includes('unauthorized') ||
+                       errorMessage.includes('Invalid key') ||
+                       errorMessage.includes('API key');
+
+    const isConfigOrAuthError = isConfigError || isAuthError;
     
     return NextResponse.json(
       {
-        error: isConfigError ? 'Razorpay configuration missing' : 'Failed to create order',
-        message: isConfigError 
+        error: isConfigOrAuthError ? 'Razorpay configuration missing' : 'Failed to create order',
+        message: isConfigOrAuthError 
           ? (process.env.NODE_ENV === 'development' || request.headers.get('host')?.includes('localhost')
               ? 'Razorpay keys are not configured. Please set RZP_KEY_ID and RZP_KEY_SECRET in your .env.local file. See docs/RAZORPAY.md for setup instructions.'
               : 'Payment gateway is not configured. Please contact support or see docs/RAZORPAY.md for setup instructions.')
           : errorMessage,
-        setupRequired: isConfigError,
+        setupRequired: isConfigOrAuthError,
+        details: process.env.NODE_ENV === 'development' ? errorDetails : undefined, // Only in dev
       },
-      { status: isConfigError ? 503 : 500 }
+      { status: isConfigOrAuthError ? 503 : 500 }
     );
   }
 }

@@ -63,33 +63,71 @@ const handlePayment = async () => {
   setIsLoading(true);
   
   try {
-    // 1. First check if Razorpay is loaded
-    if (typeof window === 'undefined' || !window.Razorpay) {
-      // If not loaded, load it dynamically
-      const script = document.createElement('script') as HTMLScriptElement & {
-        onload: (() => void) | null;
-        onerror: ((event: Event | string) => void) | null;
-      };
+    // 1. Ensure Razorpay SDK is loaded
+    if (typeof window === 'undefined') {
+      throw new Error('Window object is not available. Please refresh the page.');
+    }
+
+    // Wait for Razorpay to be available
+    if (!window.Razorpay) {
+      // Check if script is already being loaded
+      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
       
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-      
-      return new Promise<void>((resolve) => {
-        script.onload = () => {
-          setScriptLoaded(true);
-          setScriptError(false);
-          // Retry payment after script loads
-          handlePayment().finally(() => resolve());
+      if (!existingScript) {
+        // Load Razorpay script dynamically
+        const script = document.createElement('script') as HTMLScriptElement & {
+          onload: (() => void) | null;
+          onerror: ((event: Event | string) => void) | null;
         };
         
-        script.onerror = () => {
-          setScriptError(true);
-          setIsLoading(false);
-          options.onError?.('Failed to load Razorpay. Please refresh the page.');
-          resolve();
-        };
-      });
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        
+        // Wait for script to load
+        await new Promise<void>((resolve, reject) => {
+          script.onload = () => {
+            setScriptLoaded(true);
+            setScriptError(false);
+            resolve();
+          };
+          
+          script.onerror = () => {
+            setScriptError(true);
+            setIsLoading(false);
+            reject(new Error('Failed to load Razorpay SDK. Please check your internet connection and try again.'));
+          };
+          
+          // Timeout after 10 seconds
+          setTimeout(() => {
+            if (!window.Razorpay) {
+              reject(new Error('Razorpay SDK loading timed out. Please refresh the page.'));
+            }
+          }, 10000);
+        });
+      } else {
+        // Script is loading, wait for it
+        await new Promise<void>((resolve, reject) => {
+          const checkRazorpay = setInterval(() => {
+            if (window.Razorpay) {
+              clearInterval(checkRazorpay);
+              setScriptLoaded(true);
+              resolve();
+            }
+          }, 100);
+          
+          // Timeout after 10 seconds
+          setTimeout(() => {
+            clearInterval(checkRazorpay);
+            if (!window.Razorpay) {
+              reject(new Error('Razorpay SDK loading timed out. Please refresh the page.'));
+            }
+          }, 10000);
+        });
+      }
+    } else {
+      // Razorpay is already loaded
+      setScriptLoaded(true);
     }
 
     // 2. Create order on server
@@ -114,17 +152,43 @@ const handlePayment = async () => {
     });
 
     if (!orderResponse.ok) {
-      const error = await orderResponse.json().catch(() => ({}));
-      const errorMessage = error.message || error.error || 'Failed to create order';
+      let error: any = {};
+      let errorText = '';
+      
+      try {
+        errorText = await orderResponse.text();
+        try {
+          error = JSON.parse(errorText);
+        } catch (parseError) {
+          // If not JSON, use the text as error message
+          error = { message: errorText || `HTTP ${orderResponse.status}: ${orderResponse.statusText}` };
+        }
+      } catch (e) {
+        error = { message: `HTTP ${orderResponse.status}: ${orderResponse.statusText}` };
+      }
+
+      const errorMessage = error.message || error.error || `Failed to create order (${orderResponse.status})`;
+      
+      console.error('Order creation failed:', {
+        status: orderResponse.status,
+        statusText: orderResponse.statusText,
+        error,
+        errorText,
+      });
       
       // Check if this is a Razorpay configuration error
-      if (error.setupRequired || errorMessage.includes('Razorpay') || errorMessage.includes('configuration')) {
+      if (error.setupRequired || errorMessage.includes('Razorpay') || errorMessage.includes('configuration') || errorMessage.includes('keys are not configured')) {
         const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
         if (isLocalhost) {
           throw new Error('Razorpay keys are not configured. Please set RZP_KEY_ID and RZP_KEY_SECRET in your .env.local file. See docs/RAZORPAY.md for setup instructions.');
         } else {
           throw new Error('Payment gateway is not configured. Please contact support or see docs/RAZORPAY.md for setup instructions.');
         }
+      }
+      
+      // Check for authentication errors
+      if (orderResponse.status === 401) {
+        throw new Error('Authentication required. Please login and try again.');
       }
       
       throw new Error(errorMessage);
@@ -266,19 +330,32 @@ const handlePayment = async () => {
       },
     };
 
-    // Ensure Razorpay is loaded before creating instance
-    if (!window.Razorpay) {
-      throw new Error('Razorpay SDK failed to load. Please refresh the page and try again.');
+    // Validate required options (Razorpay is already loaded at this point)
+    if (!orderData.orderId) {
+      throw new Error('Order ID is missing. Cannot proceed with payment.');
     }
+
+    if (!amountInPaise || amountInPaise <= 0) {
+      throw new Error('Invalid payment amount. Cannot proceed with payment.');
+    }
+
+    console.log('Opening Razorpay payment gateway:', {
+      orderId: orderData.orderId,
+      amount: amountInPaise,
+      currency: razorpayOptions.currency,
+      key: finalKeyId ? `${finalKeyId.substring(0, 8)}...` : 'missing',
+    });
 
     const rzp = new window.Razorpay(razorpayOptions);
     
+    // Handle payment failure
     rzp.on('payment.failed', function (response: any) {
+      console.error('Payment failed:', response);
       setIsLoading(false);
-      options.onError?.(response.error?.description || 'Payment failed');
+      options.onError?.(response.error?.description || response.error?.reason || 'Payment failed');
     });
 
-    // Open Razorpay payment gateway
+    // Open Razorpay payment gateway - this should redirect to Razorpay checkout
     rzp.open();
     
     // Set loading to false when modal opens (it's now in Razorpay's control)

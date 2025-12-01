@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactCompiler: true,
   
   // Production optimizations
@@ -78,7 +77,7 @@ const nextConfig: NextConfig = {
   // Setting the root directory to prevent lockfile detection warnings
   turbopack: {
     root: process.cwd(),
-  } as any,
+  },
 };
 
 export default nextConfig;

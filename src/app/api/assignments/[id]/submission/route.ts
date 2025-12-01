@@ -9,8 +9,9 @@ const SESSION_SIGNATURE_COOKIE_NAME = "session_sig";
 
 export const GET = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) => {
+  const { params } = context;
   const cookieStore = await request.cookies;
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
   const sessionSignature = cookieStore.get(SESSION_SIGNATURE_COOKIE_NAME)?.value ?? null;
