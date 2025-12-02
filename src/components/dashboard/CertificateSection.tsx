@@ -356,22 +356,22 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
   };
 
   return (
-    <div className="bg-gradient-to-br from-white via-amber-50/40 to-yellow-50/30 dark:from-gray-900 dark:via-amber-950/20 dark:to-yellow-950/10 border-2 border-amber-200 dark:border-amber-800/60 rounded-2xl shadow-lg dark:shadow-xl p-8 mb-8 hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-300">
-      <div className="flex items-start justify-between mb-6">
+    <div className="bg-gradient-to-br from-white via-amber-50/40 to-yellow-50/30 dark:from-gray-900 dark:via-amber-950/20 dark:to-yellow-950/10 border-2 border-amber-200 dark:border-amber-800/60 rounded-2xl shadow-lg dark:shadow-xl px-4 py-6 sm:p-8 mb-8 hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-300">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl shadow-lg">
             <Award className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Course Completion Certificate</h2>
-            <p className="text-gray-600 dark:text-gray-400">Download your official certificate of completion</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 leading-snug">Course Completion Certificate</h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Download your official certificate of completion</p>
           </div>
         </div>
       </div>
 
       {/* Certificate Features */}
       {hasPurchased && isCourseCompleted && (
-        <div className="grid md:grid-cols-3 gap-4 mb-6">
+        <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* Verification Feature */}
           <motion.div
             whileHover={{ scale: 1.02, y: -2 }}
@@ -443,7 +443,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
       {hasPurchased ? (
         <div className="space-y-4">
           {isCourseCompleted ? (
-            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-300 dark:border-green-800 rounded-xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-300 dark:border-green-800 rounded-xl shadow-sm">
               <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-green-900 dark:text-green-100">Course Completed</p>
@@ -451,7 +451,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 rounded-xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 rounded-xl shadow-sm">
               <Lock className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-amber-900 dark:text-amber-100">Complete Course to Unlock Certificate</p>
@@ -461,7 +461,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
           )}
 
           {/* Certificate Preview */}
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative w-full mx-auto">
             <div className={`relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 shadow-lg ${
               isCourseCompleted 
                 ? "border-amber-400 dark:border-amber-700 shadow-amber-500/20" 
@@ -469,7 +469,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
             }`}>
               {/* Blurred Certificate Preview */}
               <div className={`relative ${!isCourseCompleted ? "blur-sm" : ""}`}>
-                <div className="aspect-[11.69/8.27] bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-4 sm:p-6">
+                <div className="aspect-[11.69/8.27] bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-3 xs:p-4 sm:p-6">
                   {/* Certificate Border */}
                   <div className="absolute inset-2 border-3 border-amber-400 dark:border-amber-600 rounded-lg"></div>
                   <div className="absolute inset-3 border-2 border-amber-500 dark:border-amber-500 rounded"></div>
@@ -511,7 +511,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
                       <strong className="text-gray-900 dark:text-white">Practical Startup School for Students</strong>
                     </p>
                     
-                    <div className="mt-4 flex items-center gap-4 text-[10px]">
+                    <div className="mt-4 flex flex-col gap-3 text-[10px] sm:flex-row sm:items-center sm:justify-center sm:gap-4">
                       <div className="text-center">
                         <div className="w-20 h-0.5 bg-gray-900 dark:bg-gray-100 mb-1"></div>
                         <p className="text-[9px] font-semibold text-gray-900 dark:text-white">Founder & CEO</p>
@@ -561,7 +561,7 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
             whileTap={{ scale: isCourseCompleted ? 0.98 : 1 }}
             onClick={handleDownloadCertificate}
             disabled={isGenerating || !isCourseCompleted}
-            className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-300 ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-3 px-4 py-4 sm:px-6 rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all duration-300 ${
               isCourseCompleted
                 ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white hover:shadow-xl"
                 : "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
@@ -634,11 +634,11 @@ export default function CertificateSection({ userName, userEmail, hasPurchased, 
           </div>
 
           {/* Certificate Preview - Locked (Not Purchased) */}
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative w-full mx-auto">
             <div className="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-700 shadow-lg">
               {/* Blurred Certificate Preview */}
               <div className="relative blur-md">
-                <div className="aspect-[11.69/8.27] bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-4 sm:p-6">
+                <div className="aspect-[11.69/8.27] bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-3 xs:p-4 sm:p-6">
                   {/* Certificate Border */}
                   <div className="absolute inset-2 border-3 border-amber-400 dark:border-amber-600 rounded-lg"></div>
                   <div className="absolute inset-3 border-2 border-amber-500 dark:border-amber-500 rounded"></div>

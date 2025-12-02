@@ -119,14 +119,15 @@ export default function PitchCompetitionSection() {
       <motion.div
         initial={mounted ? { opacity: 0, y: 20 } : false}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 rounded-3xl p-1"
+        className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-gray-950 via-slate-950 to-indigo-950 p-[1.5px] shadow-[0_20px_80px_rgba(15,23,42,0.45)]"
         suppressHydrationWarning
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10"></div>
-        <div className="relative bg-white dark:bg-gray-900 rounded-3xl p-10 md:p-12">
+        <div className="absolute inset-x-10 -top-20 h-40 rounded-full bg-indigo-500/30 blur-3xl"></div>
+        <div className="absolute inset-x-14 -bottom-24 h-44 rounded-full bg-blue-400/20 blur-[110px]"></div>
+        <div className="relative rounded-[30px] bg-white/95 dark:bg-white/5 backdrop-blur-2xl border border-white/10 p-10 md:p-12">
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gray-100/40 dark:bg-white/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gray-100/30 dark:bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-6 right-10 w-44 h-44 bg-gradient-to-br from-indigo-500/30 to-blue-500/10 rounded-full blur-3xl opacity-70"></div>
+          <div className="absolute -bottom-10 -left-6 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
           
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-6">
@@ -186,7 +187,7 @@ export default function PitchCompetitionSection() {
                 <motion.div
                   key={item.label}
                   whileHover={{ scale: 1.03, y: -4 }}
-                  className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm"
+                  className="flex items-center gap-3 p-5 bg-white/90 dark:bg-white/5 border border-gray-200/80 dark:border-white/10 rounded-2xl shadow-lg backdrop-blur"
                 >
                   <div className="p-3 bg-gray-900 text-white rounded-xl shadow-lg">
                     <item.icon className="w-6 h-6" />
@@ -203,7 +204,7 @@ export default function PitchCompetitionSection() {
         </motion.div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-2xl p-2 flex gap-2">
+      <div className="flex gap-2 rounded-2xl border border-gray-200/80 dark:border-white/10 bg-white/90 dark:bg-white/5 backdrop-blur p-2 shadow-lg">
         {[
           { id: "overview", label: "Overview", icon: Target },
           { id: "criteria", label: "Judging Criteria", icon: Star },
