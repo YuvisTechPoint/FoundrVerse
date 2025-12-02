@@ -52,6 +52,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} light`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="min-h-screen text-gray-900 dark:text-gray-100 transition-all duration-500 flex flex-col">
         <ConditionalLayout>

@@ -16,12 +16,12 @@ export default function Pricing() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-24 transition-all duration-500 scroll-mt-28" id="pricing">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-16 sm:py-24 transition-all duration-500 scroll-mt-28" id="pricing">
       <div className="absolute inset-0 bg-gradient-to-b from-purple-50/40 via-transparent to-indigo-50/40 dark:from-purple-950/30 dark:to-indigo-950/30 pointer-events-none transition-all duration-500" />
       
       {/* Animated background elements */}
       <motion.div
-        className="absolute top-20 left-10 w-72 h-72 bg-purple-300/20 rounded-full blur-3xl"
+        className="absolute top-10 sm:top-20 left-5 sm:left-10 w-32 sm:w-48 md:w-72 h-32 sm:h-48 md:h-72 bg-purple-300/20 rounded-full blur-2xl sm:blur-3xl"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
@@ -33,7 +33,7 @@ export default function Pricing() {
         }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-300/20 rounded-full blur-3xl"
+        className="absolute bottom-10 sm:bottom-20 right-5 sm:right-10 w-40 sm:w-60 md:w-96 h-40 sm:h-60 md:h-96 bg-indigo-300/20 rounded-full blur-2xl sm:blur-3xl"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.3, 0.5, 0.3],
@@ -45,16 +45,16 @@ export default function Pricing() {
         }}
       />
       
-      <div className="relative mx-auto max-w-5xl px-6 sm:px-8">
+      <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-16"
         >
           <motion.h2
-            className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -63,7 +63,7 @@ export default function Pricing() {
             Learn like a founder, pay like a student
           </motion.h2>
           <motion.p
-            className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300"
+            className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -79,7 +79,7 @@ export default function Pricing() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
           whileHover={{ scale: 1.02, y: -5 }}
-          className="mx-auto max-w-lg rounded-3xl border border-gray-200/50 dark:border-gray-700/50 glass-strong p-10 shadow-premium-xl transition-all duration-500 relative overflow-hidden"
+          className="mx-auto max-w-lg rounded-2xl sm:rounded-3xl border border-gray-200/50 dark:border-gray-700/50 glass-strong p-6 sm:p-8 md:p-10 shadow-premium-xl transition-all duration-500 relative overflow-hidden"
         >
           {/* Shimmer effect */}
           <motion.div
@@ -96,7 +96,7 @@ export default function Pricing() {
           />
           
           <div className="relative z-10">
-            <div className="text-center mb-8">
+            <div className="text-center mb-6 sm:mb-8">
               <motion.div
                 className="flex items-end justify-center gap-2 mb-2"
                 initial={{ opacity: 0, scale: 0.5 }}
@@ -105,7 +105,7 @@ export default function Pricing() {
                 transition={{ duration: 0.5, delay: 0.4, type: "spring" }}
               >
                 <motion.span
-                  className="text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white transition-colors duration-300"
+                  className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white transition-colors duration-300"
                   animate={{
                     scale: [1, 1.05, 1],
                   }}
@@ -127,11 +127,11 @@ export default function Pricing() {
                     ease: "linear"
                   }}
                 >
-                  <Sparkles className="w-6 h-6 text-gold mb-2" />
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-gold mb-2" />
                 </motion.div>
               </motion.div>
               <motion.p
-                className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300"
+                className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
@@ -141,7 +141,7 @@ export default function Pricing() {
               </motion.p>
             </div>
             
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
               {features.map((feature, index) => (
                 <motion.li
                   key={feature}
@@ -156,10 +156,10 @@ export default function Pricing() {
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <Check className="h-5 w-5 text-gray-900 dark:text-white transition-colors duration-300" />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900 dark:text-white transition-colors duration-300" />
                   </motion.div>
                   <motion.span
-                    className="text-[15px] text-gray-700 dark:text-gray-300 transition-colors duration-300"
+                    className="text-sm sm:text-[15px] text-gray-700 dark:text-gray-300 transition-colors duration-300"
                     whileHover={{ x: 5 }}
                   >
                     {feature}
@@ -174,7 +174,7 @@ export default function Pricing() {
             >
               <Link 
                 href="/signup" 
-                className="block w-full bg-gradient-to-r from-gold to-[#f9c866] text-charcoal px-6 py-4 text-center font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-lg mb-4 relative overflow-hidden group"
+                className="block w-full bg-gradient-to-r from-gold to-[#f9c866] text-charcoal px-6 py-3 sm:py-4 text-center font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base sm:text-lg mb-4 relative overflow-hidden group"
               >
                 <motion.span
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"

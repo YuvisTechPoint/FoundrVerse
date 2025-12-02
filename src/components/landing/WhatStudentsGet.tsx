@@ -39,18 +39,18 @@ const items = [
 
 export default function WhatStudentsGet() {
   return (
-    <section className="bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-24 transition-all duration-500" id="what">
-      <div className="mx-auto max-w-7xl px-6 sm:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+    <section className="bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-16 sm:py-24 transition-all duration-500" id="what">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">
             What Students Get
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-colors duration-300">
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-colors duration-300">
             Where students become CEOs. Intern, build, pitch, scale.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-16">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-12 sm:mb-16">
           {items.map(({ icon: Icon, title, desc }, index) => (
             <motion.div
               key={title}
@@ -68,7 +68,7 @@ export default function WhatStudentsGet() {
                 scale: 1.02,
                 transition: { duration: 0.3 }
               }}
-              className="group rounded-2xl border border-gray-200/50 dark:border-gray-700/50 glass-strong p-8 shadow-premium transition-all duration-300 hover:shadow-premium-xl hover:border-gold/50 dark:hover:border-gold/50 relative overflow-hidden"
+              className="group rounded-xl sm:rounded-2xl border border-gray-200/50 dark:border-gray-700/50 glass-strong p-6 sm:p-8 shadow-premium transition-all duration-300 hover:shadow-premium-xl hover:border-gold/50 dark:hover:border-gold/50 relative overflow-hidden"
             >
               {/* Animated background gradient on hover */}
               <motion.div
@@ -77,7 +77,7 @@ export default function WhatStudentsGet() {
               />
               
               <motion.div
-                className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal shadow-md relative z-10"
+                className="mb-4 sm:mb-5 inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-gold to-[#f9c866] text-charcoal shadow-md relative z-10"
                 whileHover={{ 
                   scale: 1.15,
                   rotate: [0, -10, 10, -10, 0],
@@ -96,19 +96,19 @@ export default function WhatStudentsGet() {
                   ease: "easeInOut"
                 }}
               >
-                <Icon size={28} />
+                <Icon size={24} className="sm:size-[28px]" />
               </motion.div>
               
-              <h3 className="text-xl font-bold text-charcoal dark:text-white mb-3 transition-colors duration-300 relative z-10">
+              <h3 className="text-lg sm:text-xl font-bold text-charcoal dark:text-white mb-2 sm:mb-3 transition-colors duration-300 relative z-10">
                 {title}
               </h3>
-              <p className="text-[15px] text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 relative z-10">
+              <p className="text-sm sm:text-[15px] text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 relative z-10">
                 {desc}
               </p>
               
               {/* Decorative corner element */}
               <motion.div
-                className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gold/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gold/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 initial={false}
               />
             </motion.div>
@@ -120,16 +120,16 @@ export default function WhatStudentsGet() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center space-y-6"
+          className="text-center space-y-4 sm:space-y-6"
         >
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
               <Link
                 href="/signup"
-                className="inline-block bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                className="inline-block bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden group"
               >
                 <motion.span
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -152,14 +152,14 @@ export default function WhatStudentsGet() {
             >
               <Link
                 href="/signup"
-                className="inline-block border-2 border-gray-900 dark:border-gray-300 text-gray-900 dark:text-gray-300 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                className="inline-block border-2 border-gray-900 dark:border-gray-300 text-gray-900 dark:text-gray-300 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
               >
                 Get Certified
               </Link>
             </motion.div>
           </div>
           <motion.p
-            className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300"
+            className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300"
             animate={{
               opacity: [0.7, 1, 0.7],
             }}

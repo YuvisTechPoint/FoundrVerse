@@ -21,8 +21,8 @@ export default function Hero() {
       <Navbar />
       
       {/* Hero Content - Two Column Layout */}
-      <div className="relative container mx-auto px-6 pt-32 pb-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+      <div className="relative container mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-16 sm:pb-24">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
           {/* Left Column */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -32,59 +32,61 @@ export default function Hero() {
           >
             {/* Premium Gold Badge with glassmorphism */}
             <motion.div 
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#f6b336] via-[#f9c866] to-[#fcd34d] rounded-full shadow-premium-lg border border-white/30 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-3 sm:px-5 py-2 bg-gradient-to-r from-[#f6b336] via-[#f9c866] to-[#fcd34d] rounded-full shadow-premium-lg border border-white/30 backdrop-blur-sm"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(246, 179, 54, 0.3)" }}
             >
-              <span className="text-sm font-bold text-charcoal drop-shadow-sm">Founder-taught</span>
+              <span className="text-xs sm:text-sm font-bold text-charcoal drop-shadow-sm">Founder-taught</span>
               <span className="w-1 h-1 rounded-full bg-charcoal/50" />
-              <span className="text-sm font-bold text-charcoal drop-shadow-sm">30-Day Program</span>
+              <span className="text-xs sm:text-sm font-bold text-charcoal drop-shadow-sm">30-Day</span>
               <span className="w-1 h-1 rounded-full bg-charcoal/50" />
-              <span className="text-sm font-bold text-charcoal drop-shadow-sm">₹1499</span>
+              <span className="text-xs sm:text-sm font-bold text-charcoal drop-shadow-sm">₹1499</span>
             </motion.div>
 
-            <div className="mb-4 flex items-center gap-4">
-              <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+            <div className="mb-4 flex items-center gap-3 sm:gap-4">
+              <div className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0">
                 <Image
                   src="/images/mewayz.jpeg"
                   alt="Mewayz FoundrVerse Logo"
                   fill
                   className="object-contain rounded-lg"
-                  sizes="(max-width: 768px) 64px, 80px"
+                  sizes="(max-width: 768px) 48px, 80px"
                   priority
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-3xl md:text-4xl font-bold text-charcoal dark:text-white">Mewayz</span>
-                <span className="text-sm md:text-base font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
+                <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-charcoal dark:text-white">Mewayz</span>
+                <span className="text-xs sm:text-sm md:text-base font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">FoundrVerse</span>
               </div>
             </div>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-br from-charcoal via-charcoal to-indigo-900 dark:from-white dark:via-white dark:to-gray-200 bg-clip-text text-transparent leading-[1.1] tracking-tight transition-all duration-300">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-br from-charcoal via-charcoal to-indigo-900 dark:from-white dark:via-white dark:to-gray-200 bg-clip-text text-transparent leading-[1.1] tracking-tight transition-all duration-300">
               India's First Practical Startup School for Students.
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 leading-relaxed max-w-2xl transition-colors duration-300 font-medium">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 leading-relaxed max-w-2xl transition-colors duration-300 font-medium">
               Learn how real founders build. Do it yourself. Get certified. Get internships. Pitch to investors.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link 
                   href="/signup"
-                  className="group inline-flex items-center gap-2 bg-gradient-to-r from-[#f6b336] via-[#f9c866] to-[#fcd34d] text-charcoal font-bold py-4 px-8 rounded-xl text-lg shadow-premium-xl hover:shadow-[0_25px_50px_-12px_rgba(246,179,54,0.4)] transition-all duration-300 border border-white/30 backdrop-blur-sm"
+                  className="group inline-flex items-center gap-2 bg-gradient-to-r from-[#f6b336] via-[#f9c866] to-[#fcd34d] text-charcoal font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-premium-xl hover:shadow-[0_25px_50px_-12px_rgba(246,179,54,0.4)] transition-all duration-300 border border-white/30 backdrop-blur-sm"
                 >
-                  Enroll Now
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <span className="hidden sm:inline">Enroll Now</span>
+                  <span className="sm:hidden">Enroll</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </motion.div>
               <Link 
                 href="/login"
-                className="inline-flex items-center justify-center border-2 border-charcoal/20 dark:border-gray-300/30 text-charcoal dark:text-gray-300 hover:bg-charcoal/5 dark:hover:bg-gray-300/10 hover:border-charcoal/40 dark:hover:border-gray-300/50 font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 glass backdrop-blur-sm"
+                className="inline-flex items-center justify-center border-2 border-charcoal/20 dark:border-gray-300/30 text-charcoal dark:text-gray-300 hover:bg-charcoal/5 dark:hover:bg-gray-300/10 hover:border-charcoal/40 dark:hover:border-gray-300/50 font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg transition-all duration-300 glass backdrop-blur-sm"
               >
-                Login / Signup
+                <span className="hidden sm:inline">Login / Signup</span>
+                <span className="sm:hidden">Login</span>
               </Link>
             </div>
 
@@ -109,10 +111,10 @@ export default function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex items-center gap-6 pt-6"
+              className="flex items-center gap-4 sm:gap-6 pt-4 sm:pt-6"
             >
               {/* Overlapping Avatar Circles */}
-              <div className="flex -space-x-2 relative group">
+              <div className="flex -space-x-2 relative group hidden sm:flex">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <motion.div
                     key={i}
@@ -129,14 +131,14 @@ export default function Hero() {
                       zIndex: 10,
                       transition: { duration: 0.2 }
                     }}
-                    className="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-[3px] border-white dark:border-gray-900 flex items-center justify-center text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-[3px] border-white dark:border-gray-900 flex items-center justify-center text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                     style={{
                       background: `linear-gradient(135deg, 
                         hsl(${220 + i * 10}, 70%, ${60 - i * 2}%), 
                         hsl(${270 + i * 10}, 70%, ${55 - i * 2}%))`
                     }}
                   >
-                    <span className="relative z-10 drop-shadow-sm">
+                    <span className="relative z-10 drop-shadow-sm text-xs sm:text-sm">
                       {String.fromCharCode(64 + i)}
                     </span>
                     {/* Glow effect on hover */}
@@ -159,7 +161,7 @@ export default function Hero() {
               </div>
 
               {/* Star Rating with premium glassmorphism */}
-              <div className="flex items-center gap-2 glass-strong rounded-full px-5 py-2.5 shadow-premium border border-white/40 dark:border-gray-700/30">
+              <div className="flex items-center gap-2 glass-strong rounded-full px-4 sm:px-5 py-2 sm:py-2.5 shadow-premium border border-white/40 dark:border-gray-700/30">
                 <div className="flex items-center gap-0.5">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <motion.div
@@ -179,7 +181,7 @@ export default function Hero() {
                       }}
                       className="relative"
                     >
-                      <Star className="w-5 h-5 fill-[#f6b336] text-[#f6b336] drop-shadow-sm" />
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-[#f6b336] text-[#f6b336] drop-shadow-sm" />
                       {/* Twinkle effect */}
                       <motion.div
                         className="absolute inset-0"
@@ -193,20 +195,20 @@ export default function Hero() {
                           ease: "easeInOut"
                         }}
                       >
-                        <Star className="w-5 h-5 fill-white text-white" />
+                        <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-white" />
                       </motion.div>
                     </motion.div>
                   ))}
                 </div>
                 
                 {/* Rating Text */}
-                <div className="ml-2 border-l border-gray-300 dark:border-gray-600 pl-3">
+                <div className="ml-2 border-l border-gray-300 dark:border-gray-600 pl-2 sm:pl-3">
                   <div className="flex items-baseline gap-1">
                     <motion.span
                       initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 1.1, type: "spring", stiffness: 200 }}
-                      className="text-charcoal dark:text-white font-bold text-xl transition-colors duration-300"
+                      className="text-charcoal dark:text-white font-bold text-lg sm:text-xl transition-colors duration-300"
                     >
                       4.9
                     </motion.span>
@@ -217,7 +219,8 @@ export default function Hero() {
                     transition={{ delay: 1.2 }}
                     className="text-xs text-gray-600 dark:text-gray-400 font-medium transition-colors duration-300 leading-tight"
                   >
-                    from 500+ reviews
+                    <span className="hidden sm:inline">from 500+ reviews</span>
+                    <span className="sm:hidden">500+ reviews</span>
                   </motion.p>
                 </div>
               </div>
@@ -229,11 +232,11 @@ export default function Hero() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
+            className="relative order-first lg:order-last mb-8 lg:mb-0"
             style={{ perspective: "1000px" }}
           >
             <motion.div
-              className="relative rounded-3xl overflow-hidden"
+              className="relative rounded-2xl sm:rounded-3xl overflow-hidden"
               style={{
                 transformStyle: "preserve-3d",
               }}
@@ -259,12 +262,12 @@ export default function Hero() {
               }}
             >
               {/* Enhanced 3D Shadow Layers */}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-purple-500/30 to-pink-500/30 blur-3xl opacity-60" />
-              <div className="absolute -inset-4 bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-pink-600/20 blur-2xl opacity-40" />
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-purple-500/30 to-pink-500/30 blur-2xl sm:blur-3xl opacity-60" />
+              <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-pink-600/20 blur-xl sm:blur-2xl opacity-40" />
               
               {/* Main Image Container with 3D Effect */}
               <motion.div 
-                className="relative aspect-[4/5] rounded-2xl overflow-hidden"
+                className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] rounded-xl sm:rounded-2xl overflow-hidden"
                 style={{
                   transformStyle: "preserve-3d",
                   boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
@@ -274,7 +277,7 @@ export default function Hero() {
                   src="/images/businessman-7504296_640.jpg"
                   alt="Success and Ambition - Building Your Startup Journey"
                   fill
-                  className="object-cover rounded-2xl"
+                  className="object-cover rounded-xl sm:rounded-2xl"
                   sizes="(max-width: 768px) 100vw, 50vw"
                   priority
                   style={{
@@ -287,7 +290,7 @@ export default function Hero() {
               </motion.div>
               
               {/* 3D Border Glow */}
-              <div className="absolute inset-0 rounded-2xl border-2 border-white/20 pointer-events-none" 
+              <div className="absolute inset-0 rounded-xl sm:rounded-2xl border-2 border-white/20 pointer-events-none" 
                 style={{
                   boxShadow: "inset 0 0 30px rgba(99, 102, 241, 0.3), 0 0 40px rgba(139, 92, 246, 0.2)",
                 }}
@@ -296,7 +299,7 @@ export default function Hero() {
             
             {/* Floating badge with 3D effect */}
             <motion.div 
-              className="absolute -bottom-4 -left-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 border border-gray-200 dark:border-gray-700 transition-colors duration-300 z-10"
+              className="absolute -bottom-3 sm:-bottom-4 -left-3 sm:-left-4 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700 transition-colors duration-300 z-10"
               style={{
                 transformStyle: "preserve-3d",
                 boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)",
@@ -308,7 +311,7 @@ export default function Hero() {
                 transition: { duration: 0.2 }
               }}
             >
-              <p className="text-sm font-semibold text-charcoal dark:text-white transition-colors duration-300">Real Founders</p>
+              <p className="text-xs sm:text-sm font-semibold text-charcoal dark:text-white transition-colors duration-300">Real Founders</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">4 Active Startups</p>
             </motion.div>
           </motion.div>
