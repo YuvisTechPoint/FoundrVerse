@@ -22,13 +22,13 @@ type FirebaseConfig = {
 };
 
 const firebaseConfig: FirebaseConfig = {
-  apiKey: "AIzaSyCYm9zNzLIAfNlgNdjQ_em89UUy_dMaXU4",
-  authDomain: "foundrverse-71575.firebaseapp.com",
-  projectId: "foundrverse-71575",
-  storageBucket: "foundrverse-71575.firebasestorage.app",
-  messagingSenderId: "413817556532",
-  appId: "1:413817556532:web:bcb4edbfe1fde947f30461",
-  measurementId: "G-YRLHCZT889"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 function ensureClientSide() {
